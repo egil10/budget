@@ -533,7 +533,7 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
                     ${formatAmount(total2024)}
                 </div>
             </div>
-            <div class="change-indicator" style="color: ${change >= 0 ? '#22c55e' : '#ef4444'};">
+            <div class="change-indicator" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
                 ${change >= 0 ? '↑' : '↓'} ${changeText}
             </div>
             <div class="year-column">
@@ -565,8 +565,8 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
                 </span>
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.5rem; height: 80px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 80px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.25rem; height: 50px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 50px;"></canvas>
         </div>
     `;
     
@@ -576,8 +576,8 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
         if (canvas && typeof Chart !== 'undefined') {
             // Set fixed dimensions before creating chart
             canvas.style.width = '100%';
-            canvas.style.height = '80px';
-            canvas.style.maxHeight = '80px';
+            canvas.style.height = '50px';
+            canvas.style.maxHeight = '50px';
             
             createTrendChart(canvas, total2024, total2025, chapName);
         }
@@ -602,8 +602,8 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
             datasets: [{
                 label: label,
                 data: [amount2024, amount2025],
-                borderColor: amount2025 >= amount2024 ? '#22c55e' : '#ef4444',
-                backgroundColor: amount2025 >= amount2024 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                borderColor: amount2025 >= amount2024 ? '#00aa00' : '#aa0000',
+                backgroundColor: amount2025 >= amount2024 ? 'rgba(0, 170, 0, 0.1)' : 'rgba(170, 0, 0, 0.1)',
                 borderWidth: 3,
                 tension: 0.1,
                 fill: true,

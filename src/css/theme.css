@@ -1,73 +1,51 @@
 /* theme.css - Robust theming foundation for Statsbudsjettet */
 
 :root {
-  /* Native hint */
+  /* Pure SEC Filing Style - No Theme Switching */
   color-scheme: light;
   
-  /* Typography - SEC Filing Style */
+  /* Typography - Times New Roman Only */
   --font-serif: "Times New Roman", Times, serif;
   --font-sans: "Times New Roman", Times, serif;
   
-  /* Size & radii */
-  --radius: 14px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 6px 16px rgba(0,0,0,.08);
+  /* Minimal Design - No Shadows, No Radius */
+  --radius: 0px;
+  --shadow-sm: none;
+  --shadow-md: none;
   
-  /* SEC Filing Light palette */
-  --bg: #ffffff; /* Pure white background */
-  --bg-elev: #f8f9fa; /* Very light gray */
-  --card: #ffffff; /* White cards */
-  --border: #000000; /* Black borders */
-  --text: #000000; /* Black text */
-  --text-muted: #333333; /* Dark gray for secondary text */
+  /* Pure White/Black Palette */
+  --bg: #ffffff;
+  --bg-elev: #ffffff;
+  --card: #ffffff;
+  --border: #000000;
+  --text: #000000;
+  --text-muted: #000000;
   
-  /* Accents – Norwegian state colors */
-  --accent: oklch(63% 0.13 235); /* #3b82f6-ish blue */
-  --accent-2: oklch(72% 0.12 150); /* #22c55e-ish green */
-  --accent-3: oklch(70% 0.10 30); /* warm orange/amber */
-  --accent-4: oklch(60% 0.10 280); /* purple */
-  --grid: oklch(90% 0.01 95); /* gridlines */
+  /* Change Colors Only */
+  --success: #00aa00; /* Green for increases */
+  --warn: #ffaa00; /* Yellow for warnings */
+  --danger: #aa0000; /* Red for decreases */
   
-  /* States */
-  --success: oklch(70% 0.12 150);
-  --warn: oklch(75% 0.13 90);
-  --danger: oklch(62% 0.13 25);
+  /* No Transitions - Static Design */
+  --ease: none;
+  --t: 0ms;
   
-  /* Transitions */
-  --ease: cubic-bezier(.2,.8,.2,1);
-  --t: 220ms;
+  /* Minimal Typography Scale */
+  --step--1: 9px;
+  --step-0: 10px;
+  --step-1: 11px;
+  --step-2: 12px;
+  --step-3: 14px;
   
-  /* Typographic scale */
-  --step--1: clamp(.875rem, .83rem + .2vw, .95rem);
-  --step-0: clamp(1rem, .96rem + .25vw, 1.1rem);
-  --step-1: clamp(1.25rem, 1.1rem + .6vw, 1.5rem);
-  --step-2: clamp(1.5rem, 1.3rem + .9vw, 1.75rem);
-  --step-3: clamp(1.875rem, 1.6rem + 1.2vw, 2.25rem);
-  
-  /* Spacing scale */
-  --space-1: .5rem;
-  --space-2: .75rem;
-  --space-3: 1rem;
-  --space-4: 1.5rem;
-  --space-5: 2rem;
+  /* Minimal Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
 }
 
-html[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #1a1a1a;
-  --bg-elev: #2a2a2a;
-  --card: #1a1a1a;
-  --border: #ffffff;
-  --text: #ffffff;
-  --text-muted: #cccccc;
-  --accent: #0066cc;
-  --accent-2: #006600;
-  --accent-3: #cc6600;
-  --accent-4: #6600cc;
-  --grid: #333333;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
-  --shadow-md: 0 10px 24px rgba(0,0,0,.45);
-}
+/* No dark theme - Pure SEC filing style only */
 
 /* Base usage */
 html, body {
