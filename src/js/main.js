@@ -551,8 +551,8 @@ function createComparisonCard(postData, items2024, items2025) {
     
     card.innerHTML = `
         <div class="budget-card-header">
-            <h3>Post ${postData.postNr} · ${postData.postNavn}</h3>
-            <div class="budget-card-subtitle">Kap. ${postData.kapNr} · ${postData.kapNavn}</div>
+            <h3>${postData.postNavn} (Post ${postData.postNr})</h3>
+            <div class="budget-card-subtitle">${postData.kapNavn} (Kap. ${postData.kapNr})</div>
         </div>
         <div class="context-line">
             ${postData.gdepNavn} · ${postData.omrNavn} · ${postData.katNavn}
