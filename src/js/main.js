@@ -808,7 +808,7 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
     
     // Determine colors based on change with color intensity based on change magnitude
     const isIncrease = amount2025 >= amount2024;
-    const changePercent = total2024 > 0 ? Math.abs((amount2025 - amount2024) / total2024) : 0;
+    const changePercent = amount2024 > 0 ? Math.abs((amount2025 - amount2024) / amount2024) : 0;
     
     let lineColor, fillColor;
     if (isIncrease) {
