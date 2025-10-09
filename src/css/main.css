@@ -32,9 +32,9 @@ body {
     justify-content: space-between;
     align-items: center;
     background: #ffffff;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid #000000;
-    height: 40px;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #000000;
+    height: 50px;
     position: fixed;
     top: 0;
     left: 0;
@@ -59,12 +59,12 @@ body {
     background: #ffffff;
     border: 1px solid #000000;
     border-radius: 0;
-    padding: 0.25rem 1.5rem 0.25rem 0.5rem;
-    font-size: 9px;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    font-size: 10px;
     color: #000000;
-    width: 150px;
+    width: 200px;
     font-family: "Times New Roman", Times, serif;
-    height: 24px;
+    height: 32px;
 }
 
 .header-search-input:focus {
@@ -84,13 +84,15 @@ body {
 
 .app-title {
     font-weight: 700;
-    font-size: 12px;
+    font-size: 14px;
     color: #000000;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-family: "Times New Roman", Times, serif;
     margin: 0;
+    border-bottom: 1px solid #000000;
+    padding-bottom: 0.25rem;
 }
 
 /* Icon Buttons - Minimal */
@@ -98,14 +100,14 @@ body {
     background: transparent;
     border: 1px solid #000000;
     border-radius: 0;
-    padding: 4px;
+    padding: 6px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #000000;
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
 }
 
 .icon-btn:hover {
@@ -114,8 +116,8 @@ body {
 
 .icon-btn svg {
     display: block;
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     stroke: currentColor;
     fill: none;
     stroke-width: 1.5;
@@ -126,9 +128,9 @@ body {
 /* Sidebar */
 .sidebar {
     position: fixed;
-    top: 40px;
+    top: 50px;
     left: 0;
-    height: calc(100vh - 40px);
+    height: calc(100vh - 50px);
     background: #ffffff;
     border-right: 1px solid #000000;
     overflow: hidden;
@@ -276,8 +278,8 @@ body {
 /* Main Content */
 .main-content {
     margin-left: 0;
-    margin-top: 40px;
-    min-height: calc(100vh - 40px);
+    margin-top: 50px;
+    min-height: calc(100vh - 50px);
 }
 
 body.sidebar-expanded .main-content {
@@ -286,21 +288,21 @@ body.sidebar-expanded .main-content {
 
 /* Main Grid */
 main {
-    min-height: calc(100vh - 40px);
-    padding: 1rem 0.5rem;
+    min-height: calc(100vh - 50px);
+    padding: 1rem;
     padding-bottom: 2rem;
 }
 
 .chart-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    align-items: start;
 }
 
-/* Budget Cards - Ultra Minimal SEC Style */
+/* Budget Cards - ULTRA MINIMAL SEC Style */
 .budget-card {
     background: #ffffff;
     border: 1px solid #000000;
@@ -314,6 +316,41 @@ main {
     font-size: 9px;
     line-height: 1.1;
     font-family: "Times New Roman", Times, serif;
+    width: 100%;
+}
+
+/* Department Section Headers - Ultra Minimal SEC Style */
+.department-section {
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.department-header {
+    background: #ffffff;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    font-family: "Times New Roman", Times, serif;
+    width: 100%;
+}
+
+.department-header h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #000000;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: "Times New Roman", Times, serif;
+    border-bottom: 1px solid #000000;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
+}
+
+.department-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    width: 100%;
 }
 
 .budget-card:hover {
@@ -322,22 +359,22 @@ main {
     border-color: #000000;
 }
 
-/* Year Comparison Layout - Ultra Minimal */
+/* Year Comparison Layout - ULTRA MINIMAL */
 .year-comparison {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 0.25rem;
-    align-items: center;
     padding: 0.25rem 0;
     border-bottom: 1px solid #000000;
     margin-bottom: 0.25rem;
 }
 
-.year-column {
+.year-row {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.125rem;
+    padding: 0.125rem 0;
+    border-bottom: 1px dotted #000000;
 }
 
 .year-label {
@@ -346,23 +383,27 @@ main {
     color: #000000;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    border-bottom: 1px solid #000000;
-    padding-bottom: 0.125rem;
-    width: 100%;
-    text-align: center;
     font-family: "Times New Roman", Times, serif;
 }
 
-.change-indicator {
+.year-amount {
     font-size: 9px;
+    font-weight: 700;
+    color: #000000;
+    font-family: "Times New Roman", Times, serif;
+    text-align: right;
+}
+
+.change-indicator {
+    font-size: 8px;
     font-weight: 700;
     padding: 0.125rem 0.25rem;
     white-space: nowrap;
     text-align: center;
-    min-width: 50px;
     border: 1px solid #000000;
     background: #ffffff;
     font-family: "Times New Roman", Times, serif;
+    margin: 0.125rem 0;
 }
 
 .comparison-card {
@@ -376,25 +417,25 @@ main {
 .budget-card-header {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
-    padding-bottom: 0.25rem;
+    gap: 0.0625rem;
+    padding-bottom: 0.125rem;
     border-bottom: 1px solid #000000;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.125rem;
 }
 
 .budget-card-header h3 {
-    font-size: 10px;
+    font-size: 8px;
     font-weight: 700;
     color: #000000;
     margin: 0;
-    line-height: 1.1;
+    line-height: 1.0;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-family: "Times New Roman", Times, serif;
 }
 
 .budget-card-subtitle {
-    font-size: 8px;
+    font-size: 7px;
     color: #000000;
     font-weight: 400;
     text-transform: uppercase;
@@ -410,6 +451,7 @@ main {
     margin: 0.125rem 0;
     font-family: "Times New Roman", Times, serif;
     letter-spacing: 0.05em;
+    word-break: break-all;
 }
 
 .budget-details {
@@ -445,6 +487,7 @@ main {
     font-family: "Times New Roman", Times, serif;
     text-align: right;
     font-size: 8px;
+    word-break: break-all;
 }
 
 /* Chart Container */
@@ -461,10 +504,10 @@ main {
     max-height: 150px !important;
 }
 
-/* Chart Wrapper - Ultra Minimal */
+/* Chart Wrapper - ULTRA MINIMAL */
 .chart-wrapper {
     position: relative;
-    height: 50px !important;
+    height: 30px !important;
     width: 100%;
     overflow: hidden;
     flex-shrink: 0;
@@ -475,24 +518,24 @@ main {
 
 .chart-wrapper canvas {
     width: 100% !important;
-    height: 50px !important;
-    max-height: 50px !important;
-    min-height: 50px !important;
+    height: 30px !important;
+    max-height: 30px !important;
+    min-height: 30px !important;
 }
 
-/* Loading Screen */
+/* Loading Screen - SEC Filing Style */
 .loading-screen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999;
-    transition: opacity 0.5s ease-out;
+    transition: opacity 0.3s ease-out;
 }
 
 .loading-screen.hidden {
@@ -502,22 +545,40 @@ main {
 
 .loading-content {
     text-align: center;
-    color: white;
+    color: #000000;
+    font-family: "Times New Roman", Times, serif;
 }
 
 .loading-spinner {
-    width: 32px;
-    height: 32px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-top: 2px solid white;
-    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000000;
+    border-top: 1px solid #000000;
+    border-radius: 0;
     animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
+    margin: 0 auto 0.5rem;
 }
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.loading-content h2 {
+    font-size: 12px;
+    font-weight: 700;
+    color: #000000;
+    margin: 0 0 0.25rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: "Times New Roman", Times, serif;
+}
+
+.loading-content p {
+    font-size: 9px;
+    color: #000000;
+    margin: 0;
+    font-family: "Times New Roman", Times, serif;
 }
 
 /* Footer */
@@ -606,41 +667,43 @@ footer {
     background: var(--text-muted);
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive - Ultra Minimal */
 @media (max-width: 768px) {
     .header-search-input {
-        width: 150px;
+        width: 120px;
+        font-size: 8px;
+        height: 20px;
     }
     
     .app-title {
-        font-size: 1rem;
+        font-size: 10px;
     }
     
-    .chart-grid {
+    .department-grid {
         grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 0 0.5rem;
+        gap: 0.25rem;
     }
     
     .budget-card {
-        min-height: 350px;
-        padding: 1rem;
+        min-height: 150px;
+        padding: 0.25rem;
+        font-size: 8px;
     }
     
     .year-comparison {
-        gap: 0.5rem;
-        padding: 0.75rem 0;
+        gap: 0.125rem;
+        padding: 0.125rem 0;
     }
     
     .change-indicator {
-        font-size: 1rem;
-        padding: 0 0.5rem;
-        min-width: 60px;
+        font-size: 7px;
+        padding: 0.0625rem 0.125rem;
+        min-width: 30px;
     }
     
     .sidebar {
         transform: translateX(-100%);
-        width: 280px;
+        width: 200px;
     }
     
     .sidebar.expanded {
@@ -652,12 +715,12 @@ footer {
     }
     
     .slim-header {
-        width: 280px;
+        width: 200px;
     }
     
     main {
-        padding: 1rem 0.5rem;
-        padding-bottom: 2rem;
+        padding: 0.5rem 0.25rem;
+        padding-bottom: 1rem;
     }
 }
 

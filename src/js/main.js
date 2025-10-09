@@ -216,8 +216,7 @@ async function loadBudgetData() {
         // Populate categories in sidebar
         populateCategories();
         
-        // Add year filter
-        addYearFilter();
+        // Always show comparison view (both years)
         
         // Render initial data
         renderBudgetData();
@@ -231,42 +230,7 @@ async function loadBudgetData() {
     }
 }
 
-// Add year filter to header
-function addYearFilter() {
-    const rightSection = document.querySelector('.right-section');
-    if (!rightSection) return;
-    
-    // Create year filter dropdown
-    const yearFilter = document.createElement('select');
-    yearFilter.id = 'yearFilter';
-    yearFilter.className = 'year-filter';
-    yearFilter.innerHTML = `
-        <option value="both">Begge år</option>
-        <option value="2025">2025</option>
-        <option value="2024">2024</option>
-    `;
-    yearFilter.style.cssText = `
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: calc(var(--radius) - 8px);
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        color: var(--text);
-        cursor: pointer;
-        font-family: inherit;
-    `;
-    
-    yearFilter.addEventListener('change', (e) => {
-        currentYear = e.target.value;
-        renderBudgetData();
-    });
-    
-    // Insert before search
-    const headerSearch = rightSection.querySelector('.header-search');
-    if (headerSearch) {
-        rightSection.insertBefore(yearFilter, headerSearch);
-    }
-}
+// Year filter removed - always show comparison view
 
 // Populate department filters
 function populateDepartmentFilters() {
@@ -374,13 +338,8 @@ function renderBudgetData() {
     const grid = document.getElementById('budgetGrid');
     if (!grid) return;
     
-    // Get data based on year filter
+    // Always use combined data for comparison view
     let dataToUse = budgetData.combined;
-    if (currentYear === '2024') {
-        dataToUse = budgetData['2024'];
-    } else if (currentYear === '2025') {
-        dataToUse = budgetData['2025'];
-    }
     
     // Filter data
     let filtered = dataToUse.filter(item => {
@@ -405,26 +364,8 @@ function renderBudgetData() {
     // Clear grid
     grid.innerHTML = '';
     
-    // If showing both years, create comparison cards
-    if (currentYear === 'both') {
-        renderComparisonView(filtered);
-    } else {
-        // Group by department and chapter for single year view
-        const grouped = groupByDepartmentAndChapter(filtered);
-        
-        // Render cards
-        Object.entries(grouped).forEach(([deptName, chapters]) => {
-            Object.entries(chapters).forEach(([chapName, items]) => {
-                const card = createBudgetCard(deptName, chapName, items);
-                grid.appendChild(card);
-            });
-        });
-    }
-    
-    // Show message if no results
-    if (grid.children.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">Ingen resultater funnet</div>';
-    }
+    // Always show comparison view (both years)
+    renderComparisonView(filtered);
 }
 
 // Check if item matches search term
@@ -479,10 +420,40 @@ function renderComparisonView(filtered) {
         groupedByChapter[key][item.year].push(item);
     });
     
-    // Create comparison cards
+    // Group by department for section headers
+    const groupedByDepartment = {};
     Object.values(groupedByChapter).forEach(data => {
-        const card = createComparisonCard(data.deptName, data.chapName, data['2024'], data['2025']);
-        grid.appendChild(card);
+        const deptName = data.deptName;
+        if (!groupedByDepartment[deptName]) {
+            groupedByDepartment[deptName] = [];
+        }
+        groupedByDepartment[deptName].push(data);
+    });
+    
+    // Create department sections
+    Object.entries(groupedByDepartment).forEach(([deptName, chapters]) => {
+        // Create department header
+        const section = document.createElement('div');
+        section.className = 'department-section';
+        
+        const header = document.createElement('div');
+        header.className = 'department-header';
+        header.innerHTML = `
+            <h2>${deptName.toUpperCase()}</h2>
+        `;
+        section.appendChild(header);
+        
+        // Create cards for this department in 4-column grid
+        const deptGrid = document.createElement('div');
+        deptGrid.className = 'department-grid';
+        
+        chapters.forEach(data => {
+            const card = createComparisonCard(data.deptName, data.chapName, data['2024'], data['2025']);
+            deptGrid.appendChild(card);
+        });
+        
+        section.appendChild(deptGrid);
+        grid.appendChild(section);
     });
 }
 
@@ -527,26 +498,22 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
             <div class="budget-card-subtitle">${deptName}</div>
         </div>
         <div class="year-comparison">
-            <div class="year-column">
-                <div class="year-label">2024</div>
-                <div class="budget-amount" style="color: ${color}; font-size: 1.2rem;">
-                    ${formatAmount(total2024)}
-                </div>
+            <div class="year-row">
+                <span class="year-label">2024:</span>
+                <span class="year-amount">${formatAmount(total2024)}</span>
+            </div>
+            <div class="year-row">
+                <span class="year-label">2025:</span>
+                <span class="year-amount">${formatAmount(total2025)}</span>
             </div>
             <div class="change-indicator" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
                 ${change >= 0 ? '↑' : '↓'} ${changeText}
-            </div>
-            <div class="year-column">
-                <div class="year-label">2025</div>
-                <div class="budget-amount" style="color: ${color}; font-size: 1.2rem;">
-                    ${formatAmount(total2025)}
-                </div>
             </div>
         </div>
         <div class="budget-details">
             <div class="budget-detail-row">
                 <span class="budget-detail-label">Net Change:</span>
-                <span class="budget-detail-value" style="color: ${change >= 0 ? '#000000' : '#000000'}; font-weight: 700;">
+                <span class="budget-detail-value" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
                     ${formatAmount(Math.abs(change))}
                 </span>
             </div>
@@ -565,8 +532,8 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
                 </span>
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.25rem; height: 50px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 50px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 30px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 30px;"></canvas>
         </div>
     `;
     
@@ -576,8 +543,8 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
         if (canvas && typeof Chart !== 'undefined') {
             // Set fixed dimensions before creating chart
             canvas.style.width = '100%';
-            canvas.style.height = '50px';
-            canvas.style.maxHeight = '50px';
+            canvas.style.height = '30px';
+            canvas.style.maxHeight = '30px';
             
             createTrendChart(canvas, total2024, total2025, chapName);
         }
@@ -680,10 +647,10 @@ function createBudgetCard(deptName, chapName, items) {
     
     card.innerHTML = `
         <div class="budget-card-header">
-            <h3>${chapName}</h3>
-            <div class="budget-card-subtitle">${deptName} ${year ? `· ${year}` : ''}</div>
+            <h3>${chapName.toUpperCase()}</h3>
+            <div class="budget-card-subtitle">${deptName.toUpperCase()} ${year ? `· ${year}` : ''}</div>
         </div>
-        <div class="budget-amount" style="color: ${color}">
+        <div class="budget-amount">
             ${formatAmount(total)}
         </div>
         <div class="budget-details">
@@ -693,7 +660,7 @@ function createBudgetCard(deptName, chapName, items) {
             </div>
             ${items.slice(0, 2).map(item => `
                 <div class="budget-detail-row">
-                    <span class="budget-detail-label">${(item.post_navn || 'Unknown').substring(0, 20)}${(item.post_navn || '').length > 20 ? '...' : ''}</span>
+                    <span class="budget-detail-label">${(item.post_navn || 'Unknown').substring(0, 15)}${(item.post_navn || '').length > 15 ? '...' : ''}</span>
                     <span class="budget-detail-value">${formatNumber(parseFloat(item['beløp'] || item['belop'] || 0) * 1000)}</span>
                 </div>
             `).join('')}
