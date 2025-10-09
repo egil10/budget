@@ -77,7 +77,7 @@ body {
 }
 
 .nav-link {
-    font-size: 9px;
+    font-size: 10px;
     color: #000000;
     text-decoration: none;
     font-family: "Times New Roman", Times, serif;
@@ -85,10 +85,7 @@ body {
     letter-spacing: 0.05em;
     font-weight: 700;
     white-space: nowrap;
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
+    padding: 0.25rem 0.5rem;
 }
 
 .nav-link.active {

@@ -758,12 +758,13 @@ function updateNavigationWithDepartments(departments) {
     `;
     navList.appendChild(alleItem);
     
-    // Add department filter buttons with original names (truncated by CSS)
+    // Add department filter buttons with official abbreviations
     departments.forEach(dept => {
         const navItem = document.createElement('li');
         navItem.className = 'nav-item';
+        const abbreviation = getDepartmentAbbreviation(dept);
         navItem.innerHTML = `
-            <a href="#" class="nav-link" data-department="${dept}" title="${dept}">${dept}</a>
+            <a href="#" class="nav-link" data-department="${dept}" title="${dept}">${abbreviation}</a>
         `;
         navList.appendChild(navItem);
     });
@@ -792,30 +793,30 @@ function updateNavigationWithDepartments(departments) {
     navList.appendChild(sortItem);
 }
 
-// Get shortened department names for navigation
-function getShortDepartmentName(fullName) {
-    const shortNames = {
-        'Digitaliserings- og forvaltningsdepartementet': 'Digitalisering',
-        'Finansdepartementet': 'Finans',
-        'Forsvarsdepartementet': 'Forsvar',
-        'Helse- og omsorgsdepartementet': 'Helse',
-        'Justis- og beredskapsdepartementet': 'Justis',
-        'Klima- og miljødepartementet': 'Klima',
-        'Kommunal- og distriktsdepartementet': 'Kommunal',
-        'Kultur- og likestillingsdepartementet': 'Kultur',
-        'Kunnskapsdepartementet': 'Utdanning',
-        'Landbruks- og matdepartementet': 'Landbruk',
-        'Nærings- og fiskeridepartementet': 'Næring',
-        'Samferdselsdepartementet': 'Samferdsel',
-        'Utenriksdepartementet': 'Utenriks',
-        'Arbeids- og inkluderingsdepartementet': 'Arbeid',
-        'Barne- og familiedepartementet': 'Barnevern',
-        'Energidepartementet': 'Energi',
-        'Olje- og energidepartementet': 'Olje & Energi',
-        'Ymse': 'Ymse'
+// Get official department abbreviations for navigation
+function getDepartmentAbbreviation(fullName) {
+    const abbreviations = {
+        'Arbeids- og inkluderingsdepartementet': 'AID',
+        'Barne- og familiedepartementet': 'BFD',
+        'Digitaliserings- og forvaltningsdepartementet': 'DFD',
+        'Energidepartementet': 'ED',
+        'Finansdepartementet': 'FIN',
+        'Forsvarsdepartementet': 'FD',
+        'Helse- og omsorgsdepartementet': 'HOD',
+        'Justis- og beredskapsdepartementet': 'JD',
+        'Klima- og miljødepartementet': 'KLD',
+        'Kommunal- og distriktsdepartementet': 'KDD',
+        'Kultur- og likestillingsdepartementet': 'KUD',
+        'Kunnskapsdepartementet': 'KD',
+        'Landbruks- og matdepartementet': 'LMD',
+        'Nærings- og fiskeridepartementet': 'NFD',
+        'Olje- og energidepartementet': 'OED',
+        'Samferdselsdepartementet': 'SD',
+        'Utenriksdepartementet': 'UD',
+        'Ymse': 'YMSE'
     };
     
-    return shortNames[fullName] || fullName.substring(0, 12) + '...';
+    return abbreviations[fullName] || fullName.substring(0, 8) + '...';
 }
 
 console.log('Budget Dashboard main.js loaded');
