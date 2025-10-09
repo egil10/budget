@@ -4,17 +4,6 @@ import { DEPARTMENT_COLORS, CHART_CONFIG, formatAmount, formatNumber } from './c
 
 console.log('Budget Dashboard loading...');
 
-// Register Chart.js plugins
-if (typeof Chart !== 'undefined' && Chart.register) {
-    try {
-        if (typeof ChartDataLabels !== 'undefined') {
-            Chart.register(ChartDataLabels);
-            console.log('Chart.js datalabels plugin registered');
-        }
-    } catch (error) {
-        console.log('Chart.js datalabels plugin not available, continuing without it');
-    }
-}
 
 // Global state
 let budgetData = {
@@ -454,7 +443,7 @@ function renderBudgetData() {
         renderDepartmentAggregates(filtered);
     } else {
         // Show detailed comparison view for specific department
-        renderComparisonView(filtered);
+    renderComparisonView(filtered);
     }
 }
 
@@ -580,8 +569,8 @@ function createDepartmentAggregateCard(deptData) {
                 (${change >= 0 ? '+' : ''}${changePercent}) ${formatAmount(Math.abs(change))}
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 280px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 280px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 200px; position: relative; overflow: hidden;">
+            <div class="html-chart" style="width: 100%; height: 100%; max-height: 200px;"></div>
         </div>
     `;
     
@@ -606,14 +595,11 @@ function createDepartmentAggregateCard(deptData) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
     
-    // Add chart after card is in DOM
+    // Add HTML chart after card is in DOM
     setTimeout(() => {
-        const canvas = card.querySelector('.trend-chart');
-        if (canvas && typeof Chart !== 'undefined') {
-            canvas.style.width = '100%';
-            canvas.style.height = '280px';
-            canvas.style.maxHeight = '280px';
-            createTrendChart(canvas, total2024, total2025, deptData.name);
+        const chartContainer = card.querySelector('.html-chart');
+        if (chartContainer) {
+            createHTMLChart(chartContainer, total2024, total2025, deptData.name);
         }
     }, 100);
     
@@ -746,53 +732,40 @@ function createComparisonCard(postData, items2024, items2025) {
                 (${change >= 0 ? '+' : '-'}${changeText}) ${formatAmount(Math.abs(change))}
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 280px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 280px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 200px; position: relative; overflow: hidden;">
+            <div class="html-chart" style="width: 100%; height: 100%; max-height: 200px;"></div>
         </div>
     `;
     
-    // Add chart after card is in DOM
+    // Add HTML chart after card is in DOM
     setTimeout(() => {
-        const canvas = card.querySelector('.trend-chart');
-        if (canvas && typeof Chart !== 'undefined') {
-            // Set fixed dimensions before creating chart
-            canvas.style.width = '100%';
-            canvas.style.height = '280px';
-            canvas.style.maxHeight = '280px';
-            
-                    createTrendChart(canvas, total2024, total2025, `Post ${postData.postNr} · ${postData.postNavn}`);
+        const chartContainer = card.querySelector('.html-chart');
+        if (chartContainer) {
+            createHTMLChart(chartContainer, total2024, total2025, `Post ${postData.postNr} · ${postData.postNavn}`);
         }
     }, 100); // Slightly longer delay to ensure DOM is ready
     
     return card;
 }
 
-// Create trend chart for comparison
-function createTrendChart(canvas, amount2024, amount2025, label) {
-    const ctx = canvas.getContext('2d');
+// Create HTML/SVG chart for comparison
+function createHTMLChart(container, amount2024, amount2025, label) {
+    // Clear existing content
+    container.innerHTML = '';
     
-    // Destroy existing chart if it exists
-    if (canvas.chart) {
-        canvas.chart.destroy();
-    }
+    // Calculate dimensions - better aspect ratio to match container
+    const width = 100;
+    const height = 80; // Increased height for better proportions
+    const padding = 15; // Increased padding for better spacing
     
-    // High-resolution rendering
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * devicePixelRatio;
-    canvas.height = rect.height * devicePixelRatio;
-    ctx.scale(devicePixelRatio, devicePixelRatio);
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
-    
-    // Calculate min/max for y-axis scaling
+    // Calculate min/max for scaling
     const minAmount = Math.min(amount2024, amount2025);
     const maxAmount = Math.max(amount2024, amount2025);
     const range = maxAmount - minAmount;
-    const padding = range * 0.15; // 15% padding for better visualization
+    const chartPadding = range * 0.1;
     
-    const yMin = Math.max(0, minAmount - padding);
-    const yMax = maxAmount + padding;
+    const yMin = Math.max(0, minAmount - chartPadding);
+    const yMax = maxAmount + chartPadding;
     
     // Format amounts for display
     function formatAmount(value) {
@@ -806,153 +779,130 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
         return value.toString();
     }
     
-    // Determine colors based on change with color intensity based on change magnitude
+    // Determine colors
     const isIncrease = amount2025 >= amount2024;
-    const changePercent = amount2024 > 0 ? Math.abs((amount2025 - amount2024) / amount2024) : 0;
+    const lineColor = isIncrease ? '#2E7D32' : '#C62828';
+    const fillColor = isIncrease ? '#2E7D32' : '#C62828';
     
-    let lineColor, fillColor;
-    if (isIncrease) {
-        if (changePercent > 0.1) { // >10% increase
-            lineColor = '#2E7D32'; // Primary green
-            fillColor = 'rgba(46, 125, 50, 0.15)';
-        } else if (changePercent > 0.05) { // 5-10% increase
-            lineColor = '#4CAF50'; // Secondary green
-            fillColor = 'rgba(76, 175, 80, 0.15)';
-        } else { // <5% increase
-            lineColor = '#A5D6A7'; // Tertiary green
-            fillColor = 'rgba(165, 214, 167, 0.15)';
-        }
-    } else {
-        if (changePercent > 0.1) { // >10% decrease
-            lineColor = '#C62828'; // Primary red
-            fillColor = 'rgba(198, 40, 40, 0.15)';
-        } else if (changePercent > 0.05) { // 5-10% decrease
-            lineColor = '#E53935'; // Secondary red
-            fillColor = 'rgba(229, 57, 53, 0.15)';
-        } else { // <5% decrease
-            lineColor = '#EF9A9A'; // Tertiary red
-            fillColor = 'rgba(239, 154, 154, 0.15)';
-        }
+    // Calculate positions - make the line span the full width
+    const x1 = 2; // Almost at the left edge
+    const x2 = 98; // Almost at the right edge
+    const y1 = height - padding - ((amount2024 - yMin) / (yMax - yMin)) * (height - 2 * padding);
+    const y2 = height - padding - ((amount2025 - yMin) / (yMax - yMin)) * (height - 2 * padding);
+    
+    // Create SVG chart with proper aspect ratio
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 100 80');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+    
+    // Create filled area path
+    const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const areaD = `M ${x1} ${height - padding} L ${x1} ${y1} L ${x2} ${y2} L ${x2} ${height - padding} Z`;
+    areaPath.setAttribute('d', areaD);
+    areaPath.setAttribute('fill', fillColor);
+    areaPath.setAttribute('fill-opacity', '0.15');
+    areaPath.setAttribute('stroke', 'none');
+    svg.appendChild(areaPath);
+    
+    // Create line
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.setAttribute('stroke', lineColor);
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(line);
+    
+    // Add grid lines - span the wider chart area
+    for (let i = 1; i < 2; i++) {
+        const gridY = padding + (i * (height - 2 * padding) / 2);
+        const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        gridLine.setAttribute('x1', x1);
+        gridLine.setAttribute('y1', gridY);
+        gridLine.setAttribute('x2', x2);
+        gridLine.setAttribute('y2', gridY);
+        gridLine.setAttribute('stroke', '#e5e5e5');
+        gridLine.setAttribute('stroke-width', '0.5');
+        svg.appendChild(gridLine);
     }
     
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['2024', '2025'],
-            datasets: [{
-                label: label,
-                data: [amount2024, amount2025],
-                borderColor: lineColor,
-                backgroundColor: fillColor,
-                borderWidth: 3, // Thick line
-                tension: 0.1,
-                fill: true,
-                pointRadius: 0, // No data points
-                pointHoverRadius: 0,
-                pointStyle: 'circle'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: true,
-                    backgroundColor: 'transparent',
-                    titleColor: 'transparent',
-                    bodyColor: '#333333',
-                    borderColor: 'transparent',
-                    borderWidth: 0,
-                    cornerRadius: 0,
-                    displayColors: false,
-                    padding: 0,
-                    titleFont: {
-                        size: 0
-                    },
-                    bodyFont: {
-                        size: 10,
-                        family: '"Times New Roman", Times, serif',
-                        weight: 'bold'
-                    },
-                    callbacks: {
-                        title: function(context) {
-                            return '';
-                        },
-                        label: function(context) {
-                            return formatAmount(context.parsed.y);
-                        }
-                    }
-                },
-                datalabels: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    min: yMin,
-                    max: yMax,
-                    display: true,
-                    grid: {
-                        display: true,
-                        color: '#e5e5e5',
-                        lineWidth: 1
-                    },
-                    ticks: {
-                        display: true,
-                        maxTicksLimit: 4,
-                        color: '#666666',
-                        font: {
-                            size: 10,
-                            family: '"Times New Roman", Times, serif'
-                        },
-                        callback: function(value) {
-                            return formatAmount(value);
-                        }
-                    }
-                },
-                x: {
-                    display: true,
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        display: true,
-                        color: '#333333',
-                        font: {
-                            size: 11,
-                            family: '"Times New Roman", Times, serif',
-                            weight: 'bold'
-                        }
-                    }
-                }
-            },
-            elements: {
-                point: {
-                    radius: 0,
-                    hoverRadius: 0,
-                    borderWidth: 0
-                },
-                line: {
-                    tension: 0.1,
-                    borderWidth: 3
-                }
-            }
-        }
+    // Add axis labels
+    const yLabels = ['2024', '2025'];
+    yLabels.forEach((label, index) => {
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', index === 0 ? x1 : x2);
+        text.setAttribute('y', height - padding + 8);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-family', 'Times New Roman, Times, serif');
+        text.setAttribute('font-size', '9');
+        text.setAttribute('font-weight', 'bold');
+        text.setAttribute('fill', '#333333');
+        text.textContent = label;
+        svg.appendChild(text);
     });
     
-    // Store chart reference
-    canvas.chart = chart;
+    // Add y-axis labels - fewer labels to prevent overcrowding
+    for (let i = 0; i <= 2; i++) {
+        const value = yMin + (i * (yMax - yMin) / 2);
+        const y = height - padding - (i * (height - 2 * padding) / 2);
+        
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', padding - 4);
+        text.setAttribute('y', y + 3);
+        text.setAttribute('text-anchor', 'end');
+        text.setAttribute('font-family', 'Times New Roman, Times, serif');
+        text.setAttribute('font-size', '7');
+        text.setAttribute('fill', '#666666');
+        text.textContent = formatAmount(value);
+        svg.appendChild(text);
+    }
     
-    return chart;
+    container.appendChild(svg);
+    
+    // Add hover tooltip
+    const tooltip = document.createElement('div');
+    tooltip.style.cssText = `
+        position: absolute;
+        background: transparent;
+        color: #333333;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 10px;
+        font-weight: bold;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 1000;
+    `;
+    container.appendChild(tooltip);
+    
+    // Add hover events
+    svg.addEventListener('mouseenter', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Determine which point is closer
+        const distTo2024 = Math.abs(x - (padding * container.offsetWidth / 100));
+        const distTo2025 = Math.abs(x - ((width - padding) * container.offsetWidth / 100));
+        
+        const value = distTo2024 < distTo2025 ? amount2024 : amount2025;
+        const year = distTo2024 < distTo2025 ? '2024' : '2025';
+        
+        tooltip.textContent = formatAmount(value);
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = (y - 20) + 'px';
+        tooltip.style.opacity = '1';
+    });
+    
+    svg.addEventListener('mouseleave', () => {
+        tooltip.style.opacity = '0';
+    });
+    
+    return svg;
 }
 
 // Create budget card for single year
