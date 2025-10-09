@@ -522,18 +522,12 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
             <div class="budget-detail-row">
                 <span class="budget-detail-label">Net Change:</span>
                 <span class="budget-detail-value" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
-                    ${formatAmount(Math.abs(change))}
-                </span>
-            </div>
-            <div class="budget-detail-row">
-                <span class="budget-detail-label">Status:</span>
-                <span class="budget-detail-value" style="font-weight: 700; text-transform: uppercase;">
-                    ${change >= 0 ? 'Increase' : 'Decrease'}
+                    ${formatAmount(Math.abs(change))} ${changeText}
                 </span>
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.5rem; height: 40px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 40px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.5rem; height: 50px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 50px;"></canvas>
         </div>
     `;
     
@@ -543,8 +537,8 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
         if (canvas && typeof Chart !== 'undefined') {
             // Set fixed dimensions before creating chart
             canvas.style.width = '100%';
-            canvas.style.height = '40px';
-            canvas.style.maxHeight = '40px';
+            canvas.style.height = '50px';
+            canvas.style.maxHeight = '50px';
             
             createTrendChart(canvas, total2024, total2025, chapName);
         }
