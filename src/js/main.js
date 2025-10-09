@@ -718,10 +718,16 @@ function updateNavigationWithDepartments(departments) {
     const navList = document.querySelector('.nav-list');
     if (!navList) return;
     
-    // Clear existing nav items except the first "Alle" button
-    const alleButton = navList.querySelector('.nav-item:first-child');
+    // Clear all existing nav items
     navList.innerHTML = '';
-    navList.appendChild(alleButton);
+    
+    // Add "Alle" button first
+    const alleItem = document.createElement('li');
+    alleItem.className = 'nav-item';
+    alleItem.innerHTML = `
+        <a href="#" class="nav-link" data-department="all">Alle</a>
+    `;
+    navList.appendChild(alleItem);
     
     // Add department filter buttons with shortened names
     departments.forEach(dept => {
