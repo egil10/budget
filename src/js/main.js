@@ -378,7 +378,7 @@ function renderBudgetData() {
     let filtered = dataToUse.filter(item => {
         // Filter by specific department
         if (currentFilter && currentFilter !== 'all') {
-            if (item.fdep_navn !== currentFilter) {
+            if (item.fdep_navn?.trim() !== currentFilter) {
                 return false;
             }
         }
@@ -390,6 +390,12 @@ function renderBudgetData() {
         
         return true;
     });
+    
+    console.log(`Filtered data count: ${filtered.length}`);
+    console.log(`Current filter: ${currentFilter}`);
+    if (filtered.length > 0) {
+        console.log('Sample filtered item:', filtered[0]);
+    }
     
     // Sort data by kat_navn (category name) for better organization
     if (currentSort === 'alpha') {
@@ -458,6 +464,17 @@ function renderComparisonView(filtered) {
             };
         }
         groupedByPost[key][item.year].push(item);
+    });
+    
+    console.log(`Grouped posts count: ${Object.keys(groupedByPost).length}`);
+    // Log first few groups to debug
+    const firstFewGroups = Object.values(groupedByPost).slice(0, 3);
+    firstFewGroups.forEach((group, index) => {
+        console.log(`Group ${index + 1}:`, {
+            post: `${group.postNr} - ${group.postNavn}`,
+            '2024 items': group['2024'].length,
+            '2025 items': group['2025'].length
+        });
     });
     
     // Group by department for section headers
