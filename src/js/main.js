@@ -248,6 +248,7 @@ function setupNavigation() {
     const uniqueDepartments = [...new Set(budgetData.combined.map(item => item.fdep_navn))].filter(Boolean).sort();
     
     console.log('Unique departments (fdep_navn):', uniqueDepartments);
+    console.log('Department count:', uniqueDepartments.length);
     
     // Update navigation to show actual departments as filter buttons
     updateNavigationWithDepartments(uniqueDepartments);
@@ -716,7 +717,12 @@ function showError(message) {
 // Update navigation with actual departments
 function updateNavigationWithDepartments(departments) {
     const navList = document.querySelector('.nav-list');
-    if (!navList) return;
+    if (!navList) {
+        console.error('Nav list not found!');
+        return;
+    }
+    
+    console.log('Updating navigation with departments:', departments.length);
     
     // Clear all existing nav items
     navList.innerHTML = '';
