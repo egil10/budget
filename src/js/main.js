@@ -503,7 +503,20 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
     }, 0);
     
     const change = total2025 - total2024;
-    const changePercent = total2024 > 0 ? ((change / total2024) * 100).toFixed(1) : 0;
+    let changePercent = '0%';
+    let changeText = '0%';
+    
+    if (total2024 === 0 && total2025 > 0) {
+        changePercent = '∞';
+        changeText = 'Ny post';
+    } else if (total2024 === 0 && total2025 === 0) {
+        changePercent = '0%';
+        changeText = '0%';
+    } else if (total2024 > 0) {
+        const percent = ((change / total2024) * 100);
+        changePercent = percent.toFixed(1) + '%';
+        changeText = changePercent;
+    }
     
     // Get department color
     const color = DEPARTMENT_COLORS[deptName] || '#3b82f6';
@@ -521,7 +534,7 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
                 </div>
             </div>
             <div class="change-indicator" style="color: ${change >= 0 ? '#22c55e' : '#ef4444'};">
-                ${change >= 0 ? '↑' : '↓'} ${changePercent}%
+                ${change >= 0 ? '↑' : '↓'} ${changeText}
             </div>
             <div class="year-column">
                 <div class="year-label">2025</div>
@@ -546,16 +559,23 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
                 <span class="budget-detail-value">${items2025.length}</span>
             </div>
         </div>
-        <canvas class="trend-chart" style="margin-top: 1rem; height: 150px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 1rem; height: 120px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 120px;"></canvas>
+        </div>
     `;
     
     // Add chart after card is in DOM
     setTimeout(() => {
         const canvas = card.querySelector('.trend-chart');
         if (canvas && typeof Chart !== 'undefined') {
+            // Set fixed dimensions before creating chart
+            canvas.style.width = '100%';
+            canvas.style.height = '120px';
+            canvas.style.maxHeight = '120px';
+            
             createTrendChart(canvas, total2024, total2025, chapName);
         }
-    }, 0);
+    }, 100); // Slightly longer delay to ensure DOM is ready
     
     return card;
 }
@@ -564,7 +584,12 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
 function createTrendChart(canvas, amount2024, amount2025, label) {
     const ctx = canvas.getContext('2d');
     
-    new Chart(ctx, {
+    // Destroy existing chart if it exists
+    if (canvas.chart) {
+        canvas.chart.destroy();
+    }
+    
+    const chart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['2024', '2025'],
@@ -573,27 +598,61 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
                 data: [amount2024, amount2025],
                 borderColor: amount2025 >= amount2024 ? '#22c55e' : '#ef4444',
                 backgroundColor: amount2025 >= amount2024 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                borderWidth: 2,
+                borderWidth: 3,
                 tension: 0.1,
-                fill: true
+                fill: true,
+                pointRadius: 0,
+                pointHoverRadius: 0
             }]
         },
         options: {
-            ...CHART_CONFIG,
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
             plugins: {
-                ...CHART_CONFIG.plugins,
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    enabled: false
                 }
             },
             scales: {
                 y: {
-                    ...CHART_CONFIG.scales.y,
-                    beginAtZero: false
+                    beginAtZero: false,
+                    display: false,
+                    grid: {
+                        display: false
+                    }
+                },
+                x: {
+                    display: false,
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    radius: 0,
+                    hoverRadius: 0
+                },
+                line: {
+                    tension: 0.1,
+                    borderWidth: 3
                 }
             }
         }
     });
+    
+    // Store chart reference
+    canvas.chart = chart;
+    
+    return chart;
 }
 
 // Create budget card for single year

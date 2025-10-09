@@ -282,16 +282,17 @@ body.sidebar-expanded .main-content {
 /* Main Grid */
 main {
     min-height: calc(100vh - var(--header-height));
-    padding: 1rem;
-    padding-bottom: 2rem;
+    padding: 2rem 1rem;
+    padding-bottom: 3rem;
 }
 
 .chart-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
+    align-items: start;
 }
 
 /* Budget Cards */
@@ -305,6 +306,8 @@ main {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    min-height: 400px;
+    align-items: stretch;
 }
 
 .budget-card:hover {
@@ -320,6 +323,7 @@ main {
     align-items: center;
     padding: 1rem 0;
     border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
 }
 
 .year-column {
@@ -338,10 +342,12 @@ main {
 }
 
 .change-indicator {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     padding: 0 1rem;
     white-space: nowrap;
+    text-align: center;
+    min-width: 80px;
 }
 
 .comparison-card {
@@ -356,8 +362,9 @@ main {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    padding-bottom: 0.75rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
 }
 
 .budget-card-header h3 {
@@ -365,18 +372,22 @@ main {
     font-weight: 600;
     color: var(--text);
     margin: 0;
+    line-height: 1.3;
 }
 
 .budget-card-subtitle {
     font-size: 0.75rem;
     color: var(--text-muted);
     font-weight: 500;
+    opacity: 0.8;
 }
 
 .budget-amount {
     font-size: var(--step-2);
     font-weight: 700;
     color: var(--accent);
+    text-align: center;
+    margin: 0.5rem 0;
 }
 
 .budget-details {
@@ -384,6 +395,7 @@ main {
     flex-direction: column;
     gap: 0.5rem;
     font-size: 0.875rem;
+    flex-grow: 1;
 }
 
 .budget-detail-row {
@@ -404,13 +416,32 @@ main {
 /* Chart Container */
 .chart-container {
     position: relative;
-    height: 300px;
+    height: 150px;
     width: 100%;
+    overflow: hidden;
 }
 
 .chart-container canvas {
     width: 100% !important;
     height: 100% !important;
+    max-height: 150px !important;
+}
+
+/* Chart Wrapper for comparison cards */
+.chart-wrapper {
+    position: relative;
+    height: 120px !important;
+    width: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.chart-wrapper canvas {
+    width: 100% !important;
+    height: 120px !important;
+    max-height: 120px !important;
+    min-height: 120px !important;
 }
 
 /* Loading Screen */
@@ -552,6 +583,23 @@ footer {
     .chart-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+        padding: 0 0.5rem;
+    }
+    
+    .budget-card {
+        min-height: 350px;
+        padding: 1rem;
+    }
+    
+    .year-comparison {
+        gap: 0.5rem;
+        padding: 0.75rem 0;
+    }
+    
+    .change-indicator {
+        font-size: 1rem;
+        padding: 0 0.5rem;
+        min-width: 60px;
     }
     
     .sidebar {
@@ -569,6 +617,11 @@ footer {
     
     .slim-header {
         width: 280px;
+    }
+    
+    main {
+        padding: 1rem 0.5rem;
+        padding-bottom: 2rem;
     }
 }
 

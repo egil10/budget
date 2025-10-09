@@ -23,78 +23,42 @@ export const DEPARTMENT_COLORS = {
 export const CHART_CONFIG = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false, // Disable animations to prevent resizing issues
+    interaction: {
+        intersect: false,
+        mode: 'index'
+    },
     plugins: {
         legend: {
-            display: true,
-            position: 'top',
-            labels: {
-                color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#1f2937',
-                font: {
-                    size: 12,
-                    family: 'Inter, sans-serif'
-                }
-            }
+            display: false // Hide legend for small charts
         },
         tooltip: {
-            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#ffffff',
-            titleColor: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#1f2937',
-            bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#1f2937',
-            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#e5e7eb',
-            borderWidth: 1,
-            padding: 12,
-            displayColors: true,
-            callbacks: {
-                label: function(context) {
-                    let label = context.dataset.label || '';
-                    if (label) {
-                        label += ': ';
-                    }
-                    if (context.parsed.y !== null) {
-                        label += new Intl.NumberFormat('nb-NO', {
-                            style: 'currency',
-                            currency: 'NOK',
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0
-                        }).format(context.parsed.y);
-                    }
-                    return label;
-                }
-            }
+            enabled: false // Disable tooltips for small charts
         }
     },
     scales: {
         y: {
-            beginAtZero: true,
+            beginAtZero: false,
+            display: false, // Hide Y axis for small charts
             grid: {
-                color: getComputedStyle(document.documentElement).getPropertyValue('--grid').trim() || '#e5e7eb'
-            },
-            ticks: {
-                color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6b7280',
-                font: {
-                    size: 11,
-                    family: 'Inter, sans-serif'
-                },
-                callback: function(value) {
-                    if (value >= 1000000000) {
-                        return (value / 1000000000).toFixed(1) + ' Mrd';
-                    } else if (value >= 1000000) {
-                        return (value / 1000000).toFixed(1) + ' Mill';
-                    }
-                    return value.toLocaleString('nb-NO');
-                }
+                display: false
             }
         },
         x: {
+            display: false, // Hide X axis for small charts
             grid: {
                 display: false
-            },
-            ticks: {
-                color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6b7280',
-                font: {
-                    size: 11,
-                    family: 'Inter, sans-serif'
-                }
             }
+        }
+    },
+    elements: {
+        point: {
+            radius: 0,
+            hoverRadius: 0
+        },
+        line: {
+            tension: 0.1,
+            borderWidth: 3
         }
     }
 };
