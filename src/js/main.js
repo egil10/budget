@@ -753,10 +753,10 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     // Clear existing content
     container.innerHTML = '';
     
-    // Calculate dimensions - better aspect ratio to match container
-    const width = 100;
-    const height = 80; // Increased height for better proportions
-    const padding = 15; // Increased padding for better spacing
+    // Calculate dimensions - much wider SVG for wider line
+    const width = 200; // Much wider SVG
+    const height = 80; 
+    const padding = 15;
     
     // Calculate min/max for scaling
     const minAmount = Math.min(amount2024, amount2025);
@@ -784,15 +784,15 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     const lineColor = isIncrease ? '#2E7D32' : '#C62828';
     const fillColor = isIncrease ? '#2E7D32' : '#C62828';
     
-    // Calculate positions - make the line span the full width
-    const x1 = 2; // Almost at the left edge
-    const x2 = 98; // Almost at the right edge
+    // Calculate positions - now with much wider SVG
+    const x1 = 20; // Left side of wider SVG
+    const x2 = 180; // Right side of wider SVG
     const y1 = height - padding - ((amount2024 - yMin) / (yMax - yMin)) * (height - 2 * padding);
     const y2 = height - padding - ((amount2025 - yMin) / (yMax - yMin)) * (height - 2 * padding);
     
     // Create SVG chart with proper aspect ratio
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 100 80');
+    svg.setAttribute('viewBox', '0 0 200 80');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.style.width = '100%';
     svg.style.height = '100%';
@@ -830,7 +830,7 @@ function createHTMLChart(container, amount2024, amount2025, label) {
         svg.appendChild(gridLine);
     }
     
-    // Add axis labels
+    // Add axis labels - positioned at line endpoints
     const yLabels = ['2024', '2025'];
     yLabels.forEach((label, index) => {
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
