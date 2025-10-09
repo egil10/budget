@@ -495,14 +495,14 @@ function createComparisonCard(postData, items2024, items2025) {
     const card = document.createElement('div');
     card.className = 'budget-card comparison-card';
     
-    // Calculate totals
+    // Calculate totals - handle both 'beløp' and 'belop' fields
     const total2024 = items2024.reduce((sum, item) => {
-        const amount = parseFloat(item['beløp'] || item['belop'] || 0) * 1000;
+        const amount = parseFloat(item['beløp'] || item['belop'] || 0);
         return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
     
     const total2025 = items2025.reduce((sum, item) => {
-        const amount = parseFloat(item['beløp'] || item['belop'] || 0) * 1000;
+        const amount = parseFloat(item['beløp'] || item['belop'] || 0);
         return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
     
