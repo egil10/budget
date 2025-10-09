@@ -556,8 +556,17 @@ function createDepartmentAggregateCard(deptData) {
     
     card.innerHTML = `
         <div class="budget-card-header">
-            <h3>${deptData.name}</h3>
-            <div class="budget-card-subtitle">${abbreviation}</div>
+            <div class="budget-card-header-left">
+                <h3>${deptData.name}</h3>
+                <div class="budget-card-subtitle">${abbreviation}</div>
+            </div>
+            <button class="download-btn" title="Download as HTML">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7,10 12,15 17,10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            </button>
         </div>
         <div class="year-comparison">
             <div class="year-label">2024</div>
@@ -573,6 +582,127 @@ function createDepartmentAggregateCard(deptData) {
             <div class="html-chart" style="width: 100%; height: 100%; max-height: 200px;"></div>
         </div>
     `;
+    
+    // Add download button functionality
+    const downloadBtn = card.querySelector('.download-btn');
+    downloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent card click
+        
+        // Create HTML content for download
+        const cardClone = card.cloneNode(true);
+        
+        // Remove the download button from clone
+        const downloadBtnClone = cardClone.querySelector('.download-btn');
+        if (downloadBtnClone) {
+            downloadBtnClone.remove();
+        }
+        
+        // Create complete HTML document
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${deptData.name} - Statsbudsjettet</title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            margin: 20px;
+            background: #ffffff;
+            color: #000000;
+        }
+        .budget-card {
+            border: 1px solid #000000;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: #ffffff;
+        }
+        .budget-card-header-left h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #000000;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .budget-card-subtitle {
+            font-size: 10px;
+            color: #000000;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .year-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+        .year-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .year-amount {
+            font-weight: 700;
+            color: #000000;
+        }
+        .net-change-label {
+            grid-column: 1 / -1;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 10px;
+        }
+        .net-change-value {
+            grid-column: 1 / -1;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+        .chart-wrapper {
+            height: 200px;
+            border: 1px solid #e5e5e5;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f9f9f9;
+        }
+        .chart-placeholder {
+            text-align: center;
+            color: #666666;
+            font-size: 12px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 10px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+    ${cardClone.outerHTML}
+    <div class="footer">
+        <p>Generated from Statsbudsjettet - ${new Date().toLocaleDateString('no-NO')}</p>
+    </div>
+</body>
+</html>`;
+        
+        // Create and trigger download
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${deptData.name.replace(/[^a-zA-Z0-9]/g, '_')}_budget_card.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
     
     // Add click handler to drill into department
     card.addEventListener('click', () => {
@@ -716,8 +846,17 @@ function createComparisonCard(postData, items2024, items2025) {
     
     card.innerHTML = `
         <div class="budget-card-header">
-            <h3>${postData.postNavn} (Post ${postData.postNr})</h3>
-            <div class="budget-card-subtitle">${postData.kapNavn} (Kap. ${postData.kapNr})</div>
+            <div class="budget-card-header-left">
+                <h3>${postData.postNavn} (Post ${postData.postNr})</h3>
+                <div class="budget-card-subtitle">${postData.kapNavn} (Kap. ${postData.kapNr})</div>
+            </div>
+            <button class="download-btn" title="Download as HTML">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7,10 12,15 17,10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            </button>
         </div>
         <div class="context-line">
             ${postData.gdepNavn} · ${postData.omrNavn} · ${postData.katNavn}
@@ -736,6 +875,133 @@ function createComparisonCard(postData, items2024, items2025) {
             <div class="html-chart" style="width: 100%; height: 100%; max-height: 200px;"></div>
         </div>
     `;
+    
+    // Add download button functionality
+    const downloadBtn = card.querySelector('.download-btn');
+    downloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent any parent click events
+        
+        // Create HTML content for download
+        const cardClone = card.cloneNode(true);
+        
+        // Remove the download button from clone
+        const downloadBtnClone = cardClone.querySelector('.download-btn');
+        if (downloadBtnClone) {
+            downloadBtnClone.remove();
+        }
+        
+        // Create complete HTML document
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${postData.postNavn} - Statsbudsjettet</title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            margin: 20px;
+            background: #ffffff;
+            color: #000000;
+        }
+        .budget-card {
+            border: 1px solid #000000;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: #ffffff;
+        }
+        .budget-card-header-left h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #000000;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .budget-card-subtitle {
+            font-size: 10px;
+            color: #000000;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .context-line {
+            font-size: 10px;
+            color: #666666;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        .year-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+        .year-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .year-amount {
+            font-weight: 700;
+            color: #000000;
+        }
+        .net-change-label {
+            grid-column: 1 / -1;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 10px;
+        }
+        .net-change-value {
+            grid-column: 1 / -1;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+        .chart-wrapper {
+            height: 200px;
+            border: 1px solid #e5e5e5;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f9f9f9;
+        }
+        .chart-placeholder {
+            text-align: center;
+            color: #666666;
+            font-size: 12px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 10px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+    ${cardClone.outerHTML}
+    <div class="footer">
+        <p>Generated from Statsbudsjettet - ${new Date().toLocaleDateString('no-NO')}</p>
+    </div>
+</body>
+</html>`;
+        
+        // Create and trigger download
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${postData.postNavn.replace(/[^a-zA-Z0-9]/g, '_')}_post_${postData.postNr}_budget_card.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
     
     // Add HTML chart after card is in DOM
     setTimeout(() => {

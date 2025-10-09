@@ -573,9 +573,16 @@ main {
 
 .budget-card-header {
     display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0;
+}
+
+.budget-card-header-left {
+    display: flex;
     flex-direction: column;
     gap: 0.125rem;
-    margin-bottom: 0;
+    flex: 1;
 }
 
 .budget-card-header h3 {
@@ -596,6 +603,36 @@ main {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-family: "Times New Roman", Times, serif;
+}
+
+.download-btn {
+    background: transparent;
+    border: 1px solid #000000;
+    border-radius: 0;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000000;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+}
+
+.download-btn:hover {
+    background: #f0f0f0;
+}
+
+.download-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .budget-amount {
