@@ -20,37 +20,15 @@
 
     <!-- Header -->
     <header class="app-header">
-        <div class="header-top">
-            <div class="header-left">
-                <div class="search-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="header-center">
-                <div class="edition-links">
-                    <a href="#" class="edition-link active">NORGE</a>
-                    <a href="#" class="edition-link">INTERNASJONALT</a>
-                    <a href="#" class="edition-link">EUROPA</a>
-                </div>
-            </div>
-            <div class="header-right">
-                <div class="sort-controls">
-                    <button id="headerSortToggle" class="sort-btn" aria-label="Sorter alfabetisk" title="Sorter alfabetisk">
-                        <span id="sortText">A-Z</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
         <div class="masthead">
             <h1 class="masthead-title">STATSBUDSJETTET</h1>
         </div>
         
         <nav class="main-nav">
             <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="all">Alle</a>
+                </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link" data-category="departments">Departementer</a>
                     <button class="nav-dropdown-btn" aria-label="open departments submenu">
@@ -113,6 +91,20 @@
                         <svg viewBox="0 0 13 8">
                             <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
                         </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <div class="search-container">
+                        <input type="text" id="headerSearch" placeholder="Søk..." class="nav-search-input">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <button id="headerSortToggle" class="nav-sort-btn" aria-label="Sorter alfabetisk" title="Sorter alfabetisk">
+                        <span id="sortText">A-Z</span>
                     </button>
                 </li>
             </ul>

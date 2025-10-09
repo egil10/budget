@@ -276,17 +276,31 @@ function setupNavigation() {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const category = e.target.getAttribute('data-category');
-            if (category && categoryMappings[category]) {
-                // Set active nav item
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                e.target.classList.add('active');
-                
+            
+            // Set active nav item
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            if (category === 'all') {
+                // Show all data
+                currentFilter = 'all';
+            } else if (category && categoryMappings[category]) {
                 // Filter by category departments
                 currentFilter = category;
-                renderBudgetData();
             }
+            
+            renderBudgetData();
         });
     });
+    
+    // Add search functionality
+    const searchInput = document.getElementById('headerSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            renderBudgetData();
+        });
+    }
 }
 
 // Populate categories in sidebar
@@ -367,7 +381,7 @@ function renderBudgetData() {
     // Filter data
     let filtered = dataToUse.filter(item => {
         // Filter by category
-        if (currentFilter && currentFilter !== 'all') {
+        if (currentFilter && currentFilter !== 'all' && currentFilter !== 'departments') {
             const categoryMappings = {
                 'departments': [
                     'Finansdepartementet', 'Utenriksdepartementet', 'Kunnskapsdepartementet',
@@ -733,4 +747,5 @@ function showError(message) {
 }
 
 console.log('Budget Dashboard main.js loaded');
+
 
