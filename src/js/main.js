@@ -244,34 +244,37 @@ async function loadBudgetData() {
 function setupNavigation() {
     if (!budgetData.combined || budgetData.combined.length === 0) return;
     
-    // Define category mappings
+    // Get unique fdep_navn (actual departments) for better categorization
+    const uniqueDepartments = [...new Set(budgetData.combined.map(item => item.fdep_navn))].filter(Boolean);
+    const uniqueCategories = [...new Set(budgetData.combined.map(item => item.kat_navn))].filter(Boolean);
+    
+    console.log('Unique departments (fdep_navn):', uniqueDepartments);
+    console.log('Unique categories (kat_navn):', uniqueCategories);
+    
+    // Define category mappings based on actual department names (fdep_navn)
     const categoryMappings = {
-        'departments': [
-            'Finansdepartementet', 'Utenriksdepartementet', 'Kunnskapsdepartementet',
-            'Helse- og omsorgsdepartementet', 'Forsvarsdepartementet', 'Justis- og beredskapsdepartementet',
-            'Klima- og miljødepartementet', 'Arbeids- og inkluderingsdepartementet'
-        ],
-        'health': [
-            'Helse- og omsorgsdepartementet', 'Arbeids- og inkluderingsdepartementet'
-        ],
-        'education': [
-            'Kunnskapsdepartementet', 'Forsknings- og høyere utdanningsdepartementet'
-        ],
-        'defense': [
-            'Forsvarsdepartementet'
-        ],
-        'infrastructure': [
-            'Samferdselsdepartementet', 'Olje- og energidepartementet', 'Kommunal- og distriktsdepartementet'
-        ],
-        'justice': [
-            'Justis- og beredskapsdepartementet'
-        ],
-        'environment': [
-            'Klima- og miljødepartementet', 'Olje- og energidepartementet'
-        ],
-        'finance': [
-            'Finansdepartementet', 'Utenriksdepartementet'
-        ]
+        'departments': uniqueDepartments, // Show all actual departments
+        'health': uniqueDepartments.filter(dept => 
+            dept.includes('Helse') || dept.includes('omsorg') || dept.includes('Arbeid')
+        ),
+        'education': uniqueDepartments.filter(dept => 
+            dept.includes('Kunnskap') || dept.includes('Forskning') || dept.includes('Utdanning')
+        ),
+        'defense': uniqueDepartments.filter(dept => 
+            dept.includes('Forsvar')
+        ),
+        'infrastructure': uniqueDepartments.filter(dept => 
+            dept.includes('Samferdsel') || dept.includes('Energi') || dept.includes('Kommunal') || dept.includes('Digitalisering')
+        ),
+        'justice': uniqueDepartments.filter(dept => 
+            dept.includes('Justis') || dept.includes('Beredskap')
+        ),
+        'environment': uniqueDepartments.filter(dept => 
+            dept.includes('Klima') || dept.includes('Miljø')
+        ),
+        'finance': uniqueDepartments.filter(dept => 
+            dept.includes('Finans') || dept.includes('Utenriks')
+        )
     };
     
     // Add click handlers to nav links
@@ -391,39 +394,37 @@ function renderBudgetData() {
     
     // Filter data
     let filtered = dataToUse.filter(item => {
-        // Filter by category
+        // Filter by category using fdep_navn (actual department names)
         if (currentFilter && currentFilter !== 'all' && currentFilter !== 'departments') {
+            // Get unique departments for this session
+            const uniqueDepartments = [...new Set(budgetData.combined.map(item => item.fdep_navn))].filter(Boolean);
+            
             const categoryMappings = {
-                'departments': [
-                    'Finansdepartementet', 'Utenriksdepartementet', 'Kunnskapsdepartementet',
-                    'Helse- og omsorgsdepartementet', 'Forsvarsdepartementet', 'Justis- og beredskapsdepartementet',
-                    'Klima- og miljødepartementet', 'Arbeids- og inkluderingsdepartementet'
-                ],
-                'health': [
-                    'Helse- og omsorgsdepartementet', 'Arbeids- og inkluderingsdepartementet'
-                ],
-                'education': [
-                    'Kunnskapsdepartementet', 'Forsknings- og høyere utdanningsdepartementet'
-                ],
-                'defense': [
-                    'Forsvarsdepartementet'
-                ],
-                'infrastructure': [
-                    'Samferdselsdepartementet', 'Olje- og energidepartementet', 'Kommunal- og distriktsdepartementet'
-                ],
-                'justice': [
-                    'Justis- og beredskapsdepartementet'
-                ],
-                'environment': [
-                    'Klima- og miljødepartementet', 'Olje- og energidepartementet'
-                ],
-                'finance': [
-                    'Finansdepartementet', 'Utenriksdepartementet'
-                ]
+                'health': uniqueDepartments.filter(dept => 
+                    dept.includes('Helse') || dept.includes('omsorg') || dept.includes('Arbeid')
+                ),
+                'education': uniqueDepartments.filter(dept => 
+                    dept.includes('Kunnskap') || dept.includes('Forskning') || dept.includes('Utdanning')
+                ),
+                'defense': uniqueDepartments.filter(dept => 
+                    dept.includes('Forsvar')
+                ),
+                'infrastructure': uniqueDepartments.filter(dept => 
+                    dept.includes('Samferdsel') || dept.includes('Energi') || dept.includes('Kommunal') || dept.includes('Digitalisering')
+                ),
+                'justice': uniqueDepartments.filter(dept => 
+                    dept.includes('Justis') || dept.includes('Beredskap')
+                ),
+                'environment': uniqueDepartments.filter(dept => 
+                    dept.includes('Klima') || dept.includes('Miljø')
+                ),
+                'finance': uniqueDepartments.filter(dept => 
+                    dept.includes('Finans') || dept.includes('Utenriks')
+                )
             };
             
             const allowedDepts = categoryMappings[currentFilter];
-            if (allowedDepts && !allowedDepts.includes(item.gdep_navn)) {
+            if (allowedDepts && !allowedDepts.includes(item.fdep_navn)) {
                 return false;
             }
         }
@@ -436,9 +437,9 @@ function renderBudgetData() {
         return true;
     });
     
-    // Sort data
+    // Sort data by kat_navn (category name) for better organization
     if (currentSort === 'alpha') {
-        filtered.sort((a, b) => (a.kap_navn || '').localeCompare(b.kap_navn || ''));
+        filtered.sort((a, b) => (a.kat_navn || '').localeCompare(b.kat_navn || ''));
     }
     
     // Clear grid

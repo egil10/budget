@@ -51,6 +51,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin: 0;
+    cursor: pointer;
 }
 
 .main-nav {
@@ -398,16 +399,16 @@ body {
 /* Main Content */
 .main-content {
     margin-left: 0;
-    margin-top: 100px;
-    min-height: calc(100vh - 100px);
+    margin-top: 120px;
+    min-height: calc(100vh - 120px);
 }
 
 /* Main content always full width */
 
 /* Main Grid */
 main {
-    min-height: calc(100vh - 100px);
-    padding: 1rem;
+    min-height: calc(100vh - 120px);
+    padding: 2rem 1rem;
     padding-bottom: 2rem;
 }
 
