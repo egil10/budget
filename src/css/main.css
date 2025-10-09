@@ -561,8 +561,8 @@ main {
 .budget-card-header {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    margin-bottom: 0.5rem;
+    gap: 0.125rem;
+    margin-bottom: 0.125rem;
 }
 
 .budget-card-header h3 {
