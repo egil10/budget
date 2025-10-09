@@ -1,0 +1,67 @@
+# Cached API data (exclude from git, but allow for GitHub Pages)
+# data/cached/
+# data/cache/
+*.cache
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Node modules (if we add Node.js tools)
+node_modules/
+npm-debug.log*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Cleanup archives (moved files)
+archives/
+
+# Development tools and reports
+tools/
+data/reports/
+data/ssb-api/
+docs/reports/
+
+# Backup files
+*.backup
+* copy.*
+
+# Test files
+test.html
+
+# Generated reports and analysis
+*.report
+*_report.*
+*_analysis.*
+*_results.*
+*_summary.*
+*_optimization.*
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Source maps
+*.map
+
