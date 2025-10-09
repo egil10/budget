@@ -244,55 +244,30 @@ async function loadBudgetData() {
 function setupNavigation() {
     if (!budgetData.combined || budgetData.combined.length === 0) return;
     
-    // Get unique fdep_navn (actual departments) for better categorization
-    const uniqueDepartments = [...new Set(budgetData.combined.map(item => item.fdep_navn))].filter(Boolean);
-    const uniqueCategories = [...new Set(budgetData.combined.map(item => item.kat_navn))].filter(Boolean);
+    // Get unique fdep_navn (actual departments) for filter buttons
+    const uniqueDepartments = [...new Set(budgetData.combined.map(item => item.fdep_navn))].filter(Boolean).sort();
     
     console.log('Unique departments (fdep_navn):', uniqueDepartments);
-    console.log('Unique categories (kat_navn):', uniqueCategories);
     
-    // Define category mappings based on actual department names (fdep_navn)
-    const categoryMappings = {
-        'departments': uniqueDepartments, // Show all actual departments
-        'health': uniqueDepartments.filter(dept => 
-            dept.includes('Helse') || dept.includes('omsorg') || dept.includes('Arbeid')
-        ),
-        'education': uniqueDepartments.filter(dept => 
-            dept.includes('Kunnskap') || dept.includes('Forskning') || dept.includes('Utdanning')
-        ),
-        'defense': uniqueDepartments.filter(dept => 
-            dept.includes('Forsvar')
-        ),
-        'infrastructure': uniqueDepartments.filter(dept => 
-            dept.includes('Samferdsel') || dept.includes('Energi') || dept.includes('Kommunal') || dept.includes('Digitalisering')
-        ),
-        'justice': uniqueDepartments.filter(dept => 
-            dept.includes('Justis') || dept.includes('Beredskap')
-        ),
-        'environment': uniqueDepartments.filter(dept => 
-            dept.includes('Klima') || dept.includes('Miljø')
-        ),
-        'finance': uniqueDepartments.filter(dept => 
-            dept.includes('Finans') || dept.includes('Utenriks')
-        )
-    };
+    // Update navigation to show actual departments as filter buttons
+    updateNavigationWithDepartments(uniqueDepartments);
     
     // Add click handlers to nav links
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const category = e.target.getAttribute('data-category');
+            const department = e.target.getAttribute('data-department');
             
             // Set active nav item
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             e.target.classList.add('active');
             
-            if (category === 'all') {
+            if (department === 'all') {
                 // Show all data
                 currentFilter = 'all';
-            } else if (category && categoryMappings[category]) {
-                // Filter by category departments
-                currentFilter = category;
+            } else {
+                // Filter by specific department
+                currentFilter = department;
             }
             
             renderBudgetData();
@@ -394,37 +369,9 @@ function renderBudgetData() {
     
     // Filter data
     let filtered = dataToUse.filter(item => {
-        // Filter by category using fdep_navn (actual department names)
-        if (currentFilter && currentFilter !== 'all' && currentFilter !== 'departments') {
-            // Get unique departments for this session
-            const uniqueDepartments = [...new Set(budgetData.combined.map(item => item.fdep_navn))].filter(Boolean);
-            
-            const categoryMappings = {
-                'health': uniqueDepartments.filter(dept => 
-                    dept.includes('Helse') || dept.includes('omsorg') || dept.includes('Arbeid')
-                ),
-                'education': uniqueDepartments.filter(dept => 
-                    dept.includes('Kunnskap') || dept.includes('Forskning') || dept.includes('Utdanning')
-                ),
-                'defense': uniqueDepartments.filter(dept => 
-                    dept.includes('Forsvar')
-                ),
-                'infrastructure': uniqueDepartments.filter(dept => 
-                    dept.includes('Samferdsel') || dept.includes('Energi') || dept.includes('Kommunal') || dept.includes('Digitalisering')
-                ),
-                'justice': uniqueDepartments.filter(dept => 
-                    dept.includes('Justis') || dept.includes('Beredskap')
-                ),
-                'environment': uniqueDepartments.filter(dept => 
-                    dept.includes('Klima') || dept.includes('Miljø')
-                ),
-                'finance': uniqueDepartments.filter(dept => 
-                    dept.includes('Finans') || dept.includes('Utenriks')
-                )
-            };
-            
-            const allowedDepts = categoryMappings[currentFilter];
-            if (allowedDepts && !allowedDepts.includes(item.fdep_navn)) {
+        // Filter by specific department
+        if (currentFilter && currentFilter !== 'all') {
+            if (item.fdep_navn !== currentFilter) {
                 return false;
             }
         }
@@ -485,26 +432,29 @@ function groupByDepartmentAndChapter(data) {
 function renderComparisonView(filtered) {
     const grid = document.getElementById('budgetGrid');
     
-    // Group by fdep_navn (actual department) and kat_navn (category)
-    const groupedByCategory = {};
+    // Group by kap_nr and kap_navn (budget chapters) for better organization
+    const groupedByChapter = {};
     
     filtered.forEach(item => {
-        const key = `${item.fdep_navn}|||${item.kat_navn}`;
-        if (!groupedByCategory[key]) {
-            groupedByCategory[key] = {
-                deptName: item.fdep_navn,
-                catName: item.kat_navn,
+        const key = `${item.kap_nr}|||${item.kap_navn}`;
+        if (!groupedByChapter[key]) {
+            groupedByChapter[key] = {
+                kapNr: item.kap_nr,
+                kapNavn: item.kap_navn,
+                gdepNavn: item.gdep_navn,
+                omrNavn: item.omr_navn,
+                katNavn: item.kat_navn,
                 '2024': [],
                 '2025': []
             };
         }
-        groupedByCategory[key][item.year].push(item);
+        groupedByChapter[key][item.year].push(item);
     });
     
     // Group by department for section headers
     const groupedByDepartment = {};
-    Object.values(groupedByCategory).forEach(data => {
-        const deptName = data.deptName;
+    Object.values(groupedByChapter).forEach(data => {
+        const deptName = data.gdepNavn;
         if (!groupedByDepartment[deptName]) {
             groupedByDepartment[deptName] = [];
         }
@@ -512,8 +462,8 @@ function renderComparisonView(filtered) {
     });
     
     // Create department sections
-    Object.entries(groupedByDepartment).forEach(([deptName, categories]) => {
-        // Create department header
+    Object.entries(groupedByDepartment).forEach(([deptName, chapters]) => {
+        // Create department header with context
         const section = document.createElement('div');
         section.className = 'department-section';
         
@@ -528,8 +478,8 @@ function renderComparisonView(filtered) {
         const deptGrid = document.createElement('div');
         deptGrid.className = 'department-grid';
         
-        categories.forEach(data => {
-            const card = createComparisonCard(data.deptName, data.catName, data['2024'], data['2025']);
+        chapters.forEach(data => {
+            const card = createComparisonCard(data, data['2024'], data['2025']);
             deptGrid.appendChild(card);
         });
         
@@ -539,7 +489,7 @@ function renderComparisonView(filtered) {
 }
 
 // Create comparison card showing both years
-function createComparisonCard(deptName, chapName, items2024, items2025) {
+function createComparisonCard(chapterData, items2024, items2025) {
     const card = document.createElement('div');
     card.className = 'budget-card comparison-card';
     
@@ -606,7 +556,7 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
             canvas.style.height = '50px';
             canvas.style.maxHeight = '50px';
             
-            createTrendChart(canvas, total2024, total2025, chapName);
+                    createTrendChart(canvas, total2024, total2025, `Kap. ${chapterData.kapNr} · ${chapterData.kapNavn}`);
         }
     }, 100); // Slightly longer delay to ensure DOM is ready
     
