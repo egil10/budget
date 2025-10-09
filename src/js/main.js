@@ -576,7 +576,7 @@ function createDepartmentAggregateCard(deptData) {
             <div class="year-label">2025</div>
             <div class="year-amount">${formatAmount(total2025)}</div>
             <div class="net-change-label">NET CHANGE</div>
-            <div class="net-change-value" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
+            <div class="net-change-value" style="color: ${change >= 0 ? '#2E7D32' : '#C62828'};">
                 (${change >= 0 ? '+' : ''}${changePercent}) ${formatAmount(Math.abs(change))}
             </div>
         </div>
@@ -742,7 +742,7 @@ function createComparisonCard(postData, items2024, items2025) {
             <div class="year-label">2025</div>
             <div class="year-amount">${formatAmount(total2025)}</div>
             <div class="net-change-label">NET CHANGE</div>
-            <div class="net-change-value" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
+            <div class="net-change-value" style="color: ${change >= 0 ? '#2E7D32' : '#C62828'};">
                 (${change >= 0 ? '+' : '-'}${changeText}) ${formatAmount(Math.abs(change))}
             </div>
         </div>
@@ -806,10 +806,34 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
         return value.toString();
     }
     
-    // Determine colors based on change
+    // Determine colors based on change with color intensity based on change magnitude
     const isIncrease = amount2025 >= amount2024;
-    const lineColor = isIncrease ? '#2E7D32' : '#D32F2F'; // High contrast colors
-    const fillColor = isIncrease ? 'rgba(46, 125, 50, 0.1)' : 'rgba(211, 47, 47, 0.1)';
+    const changePercent = total2024 > 0 ? Math.abs((amount2025 - amount2024) / total2024) : 0;
+    
+    let lineColor, fillColor;
+    if (isIncrease) {
+        if (changePercent > 0.1) { // >10% increase
+            lineColor = '#2E7D32'; // Primary green
+            fillColor = 'rgba(46, 125, 50, 0.15)';
+        } else if (changePercent > 0.05) { // 5-10% increase
+            lineColor = '#4CAF50'; // Secondary green
+            fillColor = 'rgba(76, 175, 80, 0.15)';
+        } else { // <5% increase
+            lineColor = '#A5D6A7'; // Tertiary green
+            fillColor = 'rgba(165, 214, 167, 0.15)';
+        }
+    } else {
+        if (changePercent > 0.1) { // >10% decrease
+            lineColor = '#C62828'; // Primary red
+            fillColor = 'rgba(198, 40, 40, 0.15)';
+        } else if (changePercent > 0.05) { // 5-10% decrease
+            lineColor = '#E53935'; // Secondary red
+            fillColor = 'rgba(229, 57, 53, 0.15)';
+        } else { // <5% decrease
+            lineColor = '#EF9A9A'; // Tertiary red
+            fillColor = 'rgba(239, 154, 154, 0.15)';
+        }
+    }
     
     const chart = new Chart(ctx, {
         type: 'line',
