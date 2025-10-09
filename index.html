@@ -31,6 +31,14 @@
             <span class="app-title" onclick="window.location.reload()">Statsbudsjettet</span>
         </div>
         <div class="right-section">
+            <!-- Department Filter Dropdown -->
+            <div class="header-filter">
+                <select id="departmentFilter" class="header-filter-select">
+                    <option value="all">Alle departementer</option>
+                    <!-- Department options will be dynamically loaded -->
+                </select>
+            </div>
+            
             <!-- Search Input -->
             <div class="header-search">
                 <input type="text" id="headerSearch" placeholder="Søk i budsjettet..." class="header-search-input">
@@ -44,8 +52,6 @@
             <button id="headerSortToggle" class="sort-btn" aria-label="Sorter alfabetisk" title="Sorter alfabetisk">
                 <span id="sortText">A-Z</span>
             </button>
-            
-            
         </div>
     </header>
 
