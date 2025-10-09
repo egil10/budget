@@ -772,6 +772,95 @@ footer {
     opacity: 0.8;
 }
 
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    /* Show mobile elements, hide desktop */
+    .mobile-only {
+        display: block !important;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+    
+    /* Mobile navigation dropdown */
+    .mobile-department-select {
+        appearance: none;
+        background: #ffffff;
+        border: 1px solid #000000;
+        border-radius: 0;
+        padding: 0.5rem 2rem 0.5rem 0.75rem;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 10px;
+        color: #000000;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        min-width: 200px;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+    }
+    
+    .mobile-department-select:focus {
+        outline: none;
+        border-color: #000000;
+        box-shadow: 0 0 0 1px #000000;
+    }
+    
+    /* Mobile navigation layout */
+    .nav-list {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .nav-item {
+        width: 100%;
+    }
+    
+    /* Mobile grid - one chart per row */
+    .department-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+    
+    /* Mobile chart cards */
+    .budget-card {
+        min-height: 280px;
+        padding: 1rem;
+    }
+    
+    .chart-wrapper {
+        height: 240px !important;
+    }
+    
+    /* Mobile header adjustments */
+    .main-nav {
+        padding: 0.5rem 0;
+    }
+    
+    .masthead {
+        padding: 1rem 0;
+    }
+    
+    .masthead-title {
+        font-size: 24px;
+    }
+}
+
+@media (min-width: 769px) {
+    /* Hide mobile elements on desktop */
+    .mobile-only {
+        display: none !important;
+    }
+    
+    .desktop-only {
+        display: block !important;
+    }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;

@@ -249,6 +249,12 @@ async function loadBudgetData() {
             if (hjemButton) {
                 hjemButton.classList.add('active');
             }
+            
+            // Set mobile dropdown to "all" by default
+            const mobileSelect = document.getElementById('mobileDepartmentSelect');
+            if (mobileSelect) {
+                mobileSelect.value = 'all';
+            }
         }, 100);
         
         // Always show comparison view (both years)
@@ -290,6 +296,12 @@ function setupNavigation() {
             // Set active nav item
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             e.target.classList.add('active');
+            
+            // Sync mobile dropdown
+            const mobileSelect = document.getElementById('mobileDepartmentSelect');
+            if (mobileSelect) {
+                mobileSelect.value = department;
+            }
             
             if (department === 'all') {
                 // Show all data
@@ -1010,15 +1022,32 @@ function updateNavigationWithDepartments(departments) {
     `;
     navList.appendChild(hjemItem);
     
-    // Add department filter buttons with official abbreviations
+    // Add mobile dropdown for departments
+    const mobileDropdownItem = document.createElement('li');
+    mobileDropdownItem.className = 'nav-item mobile-only';
+    mobileDropdownItem.innerHTML = `
+        <select id="mobileDepartmentSelect" class="mobile-department-select">
+            <option value="all">Velg departement...</option>
+        </select>
+    `;
+    navList.appendChild(mobileDropdownItem);
+    
+    // Add department filter buttons with official abbreviations (desktop only)
     departments.forEach(dept => {
         const navItem = document.createElement('li');
-        navItem.className = 'nav-item';
+        navItem.className = 'nav-item desktop-only';
         const abbreviation = getDepartmentAbbreviation(dept);
         navItem.innerHTML = `
             <a href="#" class="nav-link" data-department="${dept}" title="${dept}">${abbreviation}</a>
         `;
         navList.appendChild(navItem);
+        
+        // Also add to mobile dropdown
+        const mobileSelect = document.getElementById('mobileDepartmentSelect');
+        const option = document.createElement('option');
+        option.value = dept;
+        option.textContent = dept;
+        mobileSelect.appendChild(option);
     });
     
     // Add search and sort at the end
@@ -1043,6 +1072,31 @@ function updateNavigationWithDepartments(departments) {
         </button>
     `;
     navList.appendChild(sortItem);
+    
+    // Add mobile dropdown event listener
+    const mobileSelect = document.getElementById('mobileDepartmentSelect');
+    if (mobileSelect) {
+        mobileSelect.addEventListener('change', (e) => {
+            const selectedDept = e.target.value;
+            
+            // Update active nav item for desktop
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('data-department') === selectedDept) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+            
+            if (selectedDept === 'all') {
+                currentFilter = 'all';
+            } else {
+                currentFilter = selectedDept;
+            }
+            
+            renderBudgetData();
+        });
+    }
 }
 
 // Get official department abbreviations for navigation
