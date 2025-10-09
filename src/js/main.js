@@ -277,9 +277,12 @@ function setupNavigation() {
             e.preventDefault();
             const category = e.target.getAttribute('data-category');
             if (category && categoryMappings[category]) {
+                // Set active nav item
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                e.target.classList.add('active');
+                
                 // Filter by category departments
-                const deptFilter = categoryMappings[category].join('|');
-                currentFilter = deptFilter;
+                currentFilter = category;
                 renderBudgetData();
             }
         });
@@ -363,9 +366,41 @@ function renderBudgetData() {
     
     // Filter data
     let filtered = dataToUse.filter(item => {
-        // Filter by department
-        if (currentFilter !== 'all' && item.gdep_navn !== currentFilter) {
-            return false;
+        // Filter by category
+        if (currentFilter && currentFilter !== 'all') {
+            const categoryMappings = {
+                'departments': [
+                    'Finansdepartementet', 'Utenriksdepartementet', 'Kunnskapsdepartementet',
+                    'Helse- og omsorgsdepartementet', 'Forsvarsdepartementet', 'Justis- og beredskapsdepartementet',
+                    'Klima- og miljødepartementet', 'Arbeids- og inkluderingsdepartementet'
+                ],
+                'health': [
+                    'Helse- og omsorgsdepartementet', 'Arbeids- og inkluderingsdepartementet'
+                ],
+                'education': [
+                    'Kunnskapsdepartementet', 'Forsknings- og høyere utdanningsdepartementet'
+                ],
+                'defense': [
+                    'Forsvarsdepartementet'
+                ],
+                'infrastructure': [
+                    'Samferdselsdepartementet', 'Olje- og energidepartementet', 'Kommunal- og distriktsdepartementet'
+                ],
+                'justice': [
+                    'Justis- og beredskapsdepartementet'
+                ],
+                'environment': [
+                    'Klima- og miljødepartementet', 'Olje- og energidepartementet'
+                ],
+                'finance': [
+                    'Finansdepartementet', 'Utenriksdepartementet'
+                ]
+            };
+            
+            const allowedDepts = categoryMappings[currentFilter];
+            if (allowedDepts && !allowedDepts.includes(item.gdep_navn)) {
+                return false;
+            }
         }
         
         // Filter by search term
