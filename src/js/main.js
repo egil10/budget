@@ -221,6 +221,9 @@ async function loadBudgetData() {
         // Setup navigation
         setupNavigation();
         
+        // Set default active state to "Alle"
+        document.querySelector('.nav-link[data-category="all"]').classList.add('active');
+        
         // Always show comparison view (both years)
         
         // Render initial data
@@ -300,6 +303,14 @@ function setupNavigation() {
             searchTerm = e.target.value;
             renderBudgetData();
         });
+        
+        // Add click handler to focus search
+        const searchContainer = document.querySelector('.search-container');
+        if (searchContainer) {
+            searchContainer.addEventListener('click', () => {
+                searchInput.focus();
+            });
+        }
     }
 }
 
