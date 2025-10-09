@@ -395,6 +395,16 @@ function renderBudgetData() {
     console.log(`Current filter: ${currentFilter}`);
     if (filtered.length > 0) {
         console.log('Sample filtered item:', filtered[0]);
+        
+        // Check for negative values (income vs expenses)
+        const negativeValues = filtered.filter(item => parseFloat(item['beløp'] || item['belop'] || 0) < 0);
+        const positiveValues = filtered.filter(item => parseFloat(item['beløp'] || item['belop'] || 0) > 0);
+        console.log(`Negative values (income?): ${negativeValues.length}`);
+        console.log(`Positive values (expenses?): ${positiveValues.length}`);
+        
+        if (negativeValues.length > 0) {
+            console.log('Sample negative value:', negativeValues[0]);
+        }
     }
     
     // Sort data by kat_navn (category name) for better organization
