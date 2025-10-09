@@ -124,9 +124,17 @@ function initSearch() {
 // Initialize sort
 function initSort() {
     const sortToggle = document.getElementById('headerSortToggle');
+    const sortText = document.getElementById('sortText');
+    
     if (sortToggle) {
         sortToggle.addEventListener('click', () => {
             currentSort = currentSort === 'default' ? 'alpha' : 'default';
+            
+            // Update button text
+            if (sortText) {
+                sortText.textContent = currentSort === 'alpha' ? 'Z-A' : 'A-Z';
+            }
+            
             renderBudgetData();
         });
     }
@@ -518,22 +526,14 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
                 </span>
             </div>
             <div class="budget-detail-row">
-                <span class="budget-detail-label">Items 2024:</span>
-                <span class="budget-detail-value">${items2024.length}</span>
-            </div>
-            <div class="budget-detail-row">
-                <span class="budget-detail-label">Items 2025:</span>
-                <span class="budget-detail-value">${items2025.length}</span>
-            </div>
-            <div class="budget-detail-row">
                 <span class="budget-detail-label">Status:</span>
                 <span class="budget-detail-value" style="font-weight: 700; text-transform: uppercase;">
                     ${change >= 0 ? 'Increase' : 'Decrease'}
                 </span>
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 30px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 30px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.5rem; height: 40px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 40px;"></canvas>
         </div>
     `;
     
@@ -543,8 +543,8 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
         if (canvas && typeof Chart !== 'undefined') {
             // Set fixed dimensions before creating chart
             canvas.style.width = '100%';
-            canvas.style.height = '30px';
-            canvas.style.maxHeight = '30px';
+            canvas.style.height = '40px';
+            canvas.style.maxHeight = '40px';
             
             createTrendChart(canvas, total2024, total2025, chapName);
         }

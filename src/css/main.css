@@ -91,8 +91,6 @@ body {
     letter-spacing: 0.1em;
     font-family: "Times New Roman", Times, serif;
     margin: 0;
-    border-bottom: 1px solid #000000;
-    padding-bottom: 0.25rem;
 }
 
 /* Icon Buttons - Minimal */
@@ -110,8 +108,31 @@ body {
     height: 32px;
 }
 
+/* Sort Button - Text Style */
+.sort-btn {
+    background: transparent;
+    border: 1px solid #000000;
+    border-radius: 0;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000000;
+    height: 32px;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 .icon-btn:hover {
-    background: #f0f0f0;
+    background: transparent;
+}
+
+.sort-btn:hover {
+    background: transparent;
 }
 
 .icon-btn svg {
@@ -133,7 +154,7 @@ body {
     height: calc(100vh - 50px);
     background: #ffffff;
     border-right: 1px solid #000000;
-    overflow: hidden;
+    overflow-y: auto;
     z-index: 90;
     width: 0;
 }
@@ -177,8 +198,8 @@ body {
 }
 
 .category-item:hover {
-    background: var(--border);
-    transform: translateX(4px);
+    background: transparent;
+    transform: none;
 }
 
 /* Sidebar Backdrop */
@@ -250,7 +271,7 @@ body {
 }
 
 .filter-btn:hover {
-    background: var(--border);
+    background: transparent;
 }
 
 .filter-btn.active {
@@ -305,16 +326,16 @@ main {
 /* Budget Cards - ULTRA MINIMAL SEC Style */
 .budget-card {
     background: #ffffff;
-    border: 1px solid #000000;
-    padding: 0.5rem;
+    border: 0.5px solid #000000;
+    padding: 0.75rem;
     box-shadow: none;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    min-height: 200px;
+    gap: 0.5rem;
+    min-height: 180px;
     align-items: stretch;
-    font-size: 9px;
-    line-height: 1.1;
+    font-size: 10px;
+    line-height: 1.2;
     font-family: "Times New Roman", Times, serif;
     width: 100%;
 }
@@ -357,28 +378,26 @@ main {
     box-shadow: none;
     transform: none;
     border-color: #000000;
+    background: #ffffff;
 }
 
 /* Year Comparison Layout - ULTRA MINIMAL */
 .year-comparison {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.25rem 0;
-    border-bottom: 1px solid #000000;
-    margin-bottom: 0.25rem;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .year-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.125rem 0;
-    border-bottom: 1px dotted #000000;
+    padding: 0.25rem 0;
 }
 
 .year-label {
-    font-size: 8px;
+    font-size: 9px;
     font-weight: 700;
     color: #000000;
     text-transform: uppercase;
@@ -387,7 +406,7 @@ main {
 }
 
 .year-amount {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
     color: #000000;
     font-family: "Times New Roman", Times, serif;
@@ -395,15 +414,15 @@ main {
 }
 
 .change-indicator {
-    font-size: 8px;
+    font-size: 9px;
     font-weight: 700;
-    padding: 0.125rem 0.25rem;
+    padding: 0.25rem 0.5rem;
     white-space: nowrap;
     text-align: center;
-    border: 1px solid #000000;
+    border: 0.5px solid #000000;
     background: #ffffff;
     font-family: "Times New Roman", Times, serif;
-    margin: 0.125rem 0;
+    margin: 0.25rem 0;
 }
 
 .comparison-card {
@@ -411,31 +430,29 @@ main {
 }
 
 .comparison-card:hover {
-    background: var(--card);
+    background: #ffffff;
 }
 
 .budget-card-header {
     display: flex;
     flex-direction: column;
-    gap: 0.0625rem;
-    padding-bottom: 0.125rem;
-    border-bottom: 1px solid #000000;
-    margin-bottom: 0.125rem;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .budget-card-header h3 {
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 700;
     color: #000000;
     margin: 0;
-    line-height: 1.0;
+    line-height: 1.1;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-family: "Times New Roman", Times, serif;
 }
 
 .budget-card-subtitle {
-    font-size: 7px;
+    font-size: 8px;
     color: #000000;
     font-weight: 400;
     text-transform: uppercase;
@@ -457,26 +474,24 @@ main {
 .budget-details {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
-    font-size: 8px;
+    gap: 0.25rem;
+    font-size: 9px;
     flex-grow: 1;
-    border-top: 1px solid #000000;
-    padding-top: 0.25rem;
+    margin-top: 0.5rem;
 }
 
 .budget-detail-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.0625rem 0;
-    border-bottom: 1px dotted #000000;
+    padding: 0.125rem 0;
 }
 
 .budget-detail-label {
     color: #000000;
     font-weight: 400;
     text-transform: uppercase;
-    font-size: 8px;
+    font-size: 9px;
     letter-spacing: 0.05em;
     font-family: "Times New Roman", Times, serif;
 }
@@ -486,7 +501,7 @@ main {
     color: #000000;
     font-family: "Times New Roman", Times, serif;
     text-align: right;
-    font-size: 8px;
+    font-size: 9px;
     word-break: break-all;
 }
 
@@ -507,20 +522,20 @@ main {
 /* Chart Wrapper - ULTRA MINIMAL */
 .chart-wrapper {
     position: relative;
-    height: 30px !important;
+    height: 40px !important;
     width: 100%;
     overflow: hidden;
     flex-shrink: 0;
     margin-top: auto;
-    border: 1px solid #000000;
+    border: 0.5px solid #000000;
     background: #ffffff;
 }
 
 .chart-wrapper canvas {
     width: 100% !important;
-    height: 30px !important;
-    max-height: 30px !important;
-    min-height: 30px !important;
+    height: 40px !important;
+    max-height: 40px !important;
+    min-height: 40px !important;
 }
 
 /* Loading Screen - SEC Filing Style */
