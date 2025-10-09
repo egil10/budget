@@ -218,11 +218,8 @@ async function loadBudgetData() {
         budgetData.combined = [...budgetData['2024'], ...budgetData['2025']];
         console.log(`Total budget items: ${budgetData.combined.length}`);
         
-        // Populate department filters
-        populateDepartmentFilters();
-        
-        // Populate categories in sidebar
-        populateCategories();
+        // Populate department filter dropdown
+        populateDepartmentFilter();
         
         // Always show comparison view (both years)
         
@@ -240,37 +237,31 @@ async function loadBudgetData() {
 
 // Year filter removed - always show comparison view
 
-// Populate department filters
-function populateDepartmentFilters() {
+// Populate department filter dropdown
+function populateDepartmentFilter() {
     if (!budgetData.combined || budgetData.combined.length === 0) return;
     
     // Get unique departments
     const departments = [...new Set(budgetData.combined.map(item => item.gdep_navn))].filter(Boolean).sort();
     
-    const filtersContainer = document.getElementById('departmentFilters');
-    if (!filtersContainer) return;
+    const filterSelect = document.getElementById('departmentFilter');
+    if (!filterSelect) return;
     
-    // Clear existing filters (except "Alle")
-    const allButton = filtersContainer.querySelector('[data-filter="all"]');
-    filtersContainer.innerHTML = '';
-    if (allButton) filtersContainer.appendChild(allButton);
+    // Clear existing options (except "Alle departementer")
+    filterSelect.innerHTML = '<option value="all">Alle departementer</option>';
     
-    // Add department filters
+    // Add department options
     departments.forEach(dept => {
-        const button = document.createElement('button');
-        button.className = 'filter-btn';
-        button.setAttribute('data-filter', dept);
-        button.textContent = dept;
-        button.addEventListener('click', () => {
-            // Update active state
-            filtersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
-            // Update filter
-            currentFilter = dept;
-            renderBudgetData();
-        });
-        filtersContainer.appendChild(button);
+        const option = document.createElement('option');
+        option.value = dept;
+        option.textContent = dept;
+        filterSelect.appendChild(option);
+    });
+    
+    // Add event listener
+    filterSelect.addEventListener('change', (e) => {
+        currentFilter = e.target.value;
+        renderBudgetData();
     });
 }
 
