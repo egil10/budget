@@ -147,10 +147,10 @@ async function loadBudgetData() {
         console.log('Current URL:', window.location.href);
         
         // Load 2025 budget
-        console.log('Fetching 2025 data from: /data/json/20241002_gulbok_data_til_publ.json');
+        console.log('Fetching 2025 data from: ./data/json/20241002_gulbok_data_til_publ.json');
         let response2025;
         try {
-            response2025 = await fetch('/data/json/20241002_gulbok_data_til_publ.json');
+            response2025 = await fetch('./data/json/20241002_gulbok_data_til_publ.json');
         } catch (fetchError) {
             console.error('Fetch error for 2025 data:', fetchError);
             throw new Error(`Network error loading 2025 data: ${fetchError.message}`);
@@ -181,10 +181,10 @@ async function loadBudgetData() {
         console.log(`Loaded ${budgetData['2025'].length} budget items for 2025`);
         
         // Load 2024 budget
-        console.log('Fetching 2024 data from: /data/json/gul_bok_2024_datagrunnlag.json');
+        console.log('Fetching 2024 data from: ./data/json/gul_bok_2024_datagrunnlag.json');
         let response2024;
         try {
-            response2024 = await fetch('/data/json/gul_bok_2024_datagrunnlag.json');
+            response2024 = await fetch('./data/json/gul_bok_2024_datagrunnlag.json');
         } catch (fetchError) {
             console.error('Fetch error for 2024 data:', fetchError);
             throw new Error(`Network error loading 2024 data: ${fetchError.message}`);
