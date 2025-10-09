@@ -617,7 +617,7 @@ main {
 /* Chart Wrapper - ULTRA MINIMAL */
 .chart-wrapper {
     position: relative;
-    height: 50px !important;
+    height: 80px !important;
     width: 100%;
     overflow: hidden;
     flex-shrink: 0;
@@ -628,9 +628,9 @@ main {
 
 .chart-wrapper canvas {
     width: 100% !important;
-    height: 50px !important;
-    max-height: 50px !important;
-    min-height: 50px !important;
+    height: 80px !important;
+    max-height: 80px !important;
+    min-height: 80px !important;
 }
 
 /* Loading Screen - SEC Filing Style */
