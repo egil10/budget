@@ -20,39 +20,103 @@
 
     <!-- Header -->
     <header class="app-header">
-        <div class="left-section">
-            <button id="sidebar-toggle" class="icon-btn" aria-label="Toggle sidebar" title="Toggle sidebar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <line x1="3" y1="12" x2="21" y2="12"/>
-                    <line x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
-            </button>
-            <span class="app-title" onclick="window.location.reload()">Statsbudsjettet</span>
-        </div>
-        <div class="right-section">
-            <!-- Department Filter Dropdown -->
-            <div class="header-filter">
-                <select id="departmentFilter" class="header-filter-select">
-                    <option value="all">Alle departementer</option>
-                    <!-- Department options will be dynamically loaded -->
-                </select>
+        <div class="header-top">
+            <div class="header-left">
+                <div class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </div>
             </div>
-            
-            <!-- Search Input -->
-            <div class="header-search">
-                <input type="text" id="headerSearch" placeholder="Søk i budsjettet..." class="header-search-input">
-                <svg class="header-search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
-                </svg>
+            <div class="header-center">
+                <div class="edition-links">
+                    <a href="#" class="edition-link active">NORGE</a>
+                    <a href="#" class="edition-link">INTERNASJONALT</a>
+                    <a href="#" class="edition-link">EUROPA</a>
+                </div>
             </div>
-            
-            <!-- Sort Toggle -->
-            <button id="headerSortToggle" class="sort-btn" aria-label="Sorter alfabetisk" title="Sorter alfabetisk">
-                <span id="sortText">A-Z</span>
-            </button>
+            <div class="header-right">
+                <div class="sort-controls">
+                    <button id="headerSortToggle" class="sort-btn" aria-label="Sorter alfabetisk" title="Sorter alfabetisk">
+                        <span id="sortText">A-Z</span>
+                    </button>
+                </div>
+            </div>
         </div>
+        
+        <div class="masthead">
+            <h1 class="masthead-title">STATSBUDSJETTET</h1>
+        </div>
+        
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="departments">Departementer</a>
+                    <button class="nav-dropdown-btn" aria-label="open departments submenu">
+                        <svg viewBox="0 0 13 8">
+                            <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
+                        </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="health">Helse</a>
+                    <button class="nav-dropdown-btn" aria-label="open health submenu">
+                        <svg viewBox="0 0 13 8">
+                            <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
+                        </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="education">Utdanning</a>
+                    <button class="nav-dropdown-btn" aria-label="open education submenu">
+                        <svg viewBox="0 0 13 8">
+                            <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
+                        </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="defense">Forsvar</a>
+                    <button class="nav-dropdown-btn" aria-label="open defense submenu">
+                        <svg viewBox="0 0 13 8">
+                            <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
+                        </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="infrastructure">Infrastruktur</a>
+                    <button class="nav-dropdown-btn" aria-label="open infrastructure submenu">
+                        <svg viewBox="0 0 13 8">
+                            <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
+                        </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="justice">Justis</a>
+                    <button class="nav-dropdown-btn" aria-label="open justice submenu">
+                        <svg viewBox="0 0 13 8">
+                            <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
+                        </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="environment">Miljø</a>
+                    <button class="nav-dropdown-btn" aria-label="open environment submenu">
+                        <svg viewBox="0 0 13 8">
+                            <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
+                        </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-category="finance">Finans</a>
+                    <button class="nav-dropdown-btn" aria-label="open finance submenu">
+                        <svg viewBox="0 0 13 8">
+                            <polygon fill="#979797" points="6.5,8 0,1.4 1.4,0 6.5,5.2 11.6,0 13,1.4"></polygon>
+                        </svg>
+                    </button>
+                </li>
+            </ul>
+        </nav>
     </header>
 
 

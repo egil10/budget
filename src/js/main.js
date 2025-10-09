@@ -218,8 +218,8 @@ async function loadBudgetData() {
         budgetData.combined = [...budgetData['2024'], ...budgetData['2025']];
         console.log(`Total budget items: ${budgetData.combined.length}`);
         
-        // Populate department filter dropdown
-        populateDepartmentFilter();
+        // Setup navigation
+        setupNavigation();
         
         // Always show comparison view (both years)
         
@@ -237,31 +237,52 @@ async function loadBudgetData() {
 
 // Year filter removed - always show comparison view
 
-// Populate department filter dropdown
-function populateDepartmentFilter() {
+// Setup navigation categories
+function setupNavigation() {
     if (!budgetData.combined || budgetData.combined.length === 0) return;
     
-    // Get unique departments
-    const departments = [...new Set(budgetData.combined.map(item => item.gdep_navn))].filter(Boolean).sort();
+    // Define category mappings
+    const categoryMappings = {
+        'departments': [
+            'Finansdepartementet', 'Utenriksdepartementet', 'Kunnskapsdepartementet',
+            'Helse- og omsorgsdepartementet', 'Forsvarsdepartementet', 'Justis- og beredskapsdepartementet',
+            'Klima- og miljødepartementet', 'Arbeids- og inkluderingsdepartementet'
+        ],
+        'health': [
+            'Helse- og omsorgsdepartementet', 'Arbeids- og inkluderingsdepartementet'
+        ],
+        'education': [
+            'Kunnskapsdepartementet', 'Forsknings- og høyere utdanningsdepartementet'
+        ],
+        'defense': [
+            'Forsvarsdepartementet'
+        ],
+        'infrastructure': [
+            'Samferdselsdepartementet', 'Olje- og energidepartementet', 'Kommunal- og distriktsdepartementet'
+        ],
+        'justice': [
+            'Justis- og beredskapsdepartementet'
+        ],
+        'environment': [
+            'Klima- og miljødepartementet', 'Olje- og energidepartementet'
+        ],
+        'finance': [
+            'Finansdepartementet', 'Utenriksdepartementet'
+        ]
+    };
     
-    const filterSelect = document.getElementById('departmentFilter');
-    if (!filterSelect) return;
-    
-    // Clear existing options (except "Alle departementer")
-    filterSelect.innerHTML = '<option value="all">Alle departementer</option>';
-    
-    // Add department options
-    departments.forEach(dept => {
-        const option = document.createElement('option');
-        option.value = dept;
-        option.textContent = dept;
-        filterSelect.appendChild(option);
-    });
-    
-    // Add event listener
-    filterSelect.addEventListener('change', (e) => {
-        currentFilter = e.target.value;
-        renderBudgetData();
+    // Add click handlers to nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const category = e.target.getAttribute('data-category');
+            if (category && categoryMappings[category]) {
+                // Filter by category departments
+                const deptFilter = categoryMappings[category].join('|');
+                currentFilter = deptFilter;
+                renderBudgetData();
+            }
+        });
     });
 }
 
