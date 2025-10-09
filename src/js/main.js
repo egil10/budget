@@ -4,6 +4,18 @@ import { DEPARTMENT_COLORS, CHART_CONFIG, formatAmount, formatNumber } from './c
 
 console.log('Budget Dashboard loading...');
 
+// Register Chart.js plugins
+if (typeof Chart !== 'undefined' && Chart.register) {
+    try {
+        if (typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+            console.log('Chart.js datalabels plugin registered');
+        }
+    } catch (error) {
+        console.log('Chart.js datalabels plugin not available, continuing without it');
+    }
+}
+
 // Global state
 let budgetData = {
     '2024': null,
@@ -178,6 +190,17 @@ async function loadBudgetData() {
         }
         
         budgetData['2025'] = (data2025.Data || data2025).map(item => ({ ...item, year: 2025 }));
+        
+        // Merge OLJE- OG ENERGIDEPARTEMENTET with Energidepartementet
+        budgetData['2024'] = budgetData['2024'].map(item => ({
+            ...item,
+            fdep_navn: item.fdep_navn === 'Olje- og energidepartementet' ? 'Energidepartementet' : item.fdep_navn
+        }));
+        budgetData['2025'] = budgetData['2025'].map(item => ({
+            ...item,
+            fdep_navn: item.fdep_navn === 'Olje- og energidepartementet' ? 'Energidepartementet' : item.fdep_navn
+        }));
+        
         console.log(`Loaded ${budgetData['2025'].length} budget items for 2025`);
         
         // Load 2024 budget
@@ -546,8 +569,8 @@ function createDepartmentAggregateCard(deptData) {
                 (${change >= 0 ? '+' : ''}${changePercent}) ${formatAmount(Math.abs(change))}
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 100px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 100px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 220px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 220px;"></canvas>
         </div>
     `;
     
@@ -577,8 +600,8 @@ function createDepartmentAggregateCard(deptData) {
         const canvas = card.querySelector('.trend-chart');
         if (canvas && typeof Chart !== 'undefined') {
             canvas.style.width = '100%';
-            canvas.style.height = '100px';
-            canvas.style.maxHeight = '100px';
+            canvas.style.height = '220px';
+            canvas.style.maxHeight = '220px';
             createTrendChart(canvas, total2024, total2025, deptData.name);
         }
     }, 100);
@@ -712,8 +735,8 @@ function createComparisonCard(postData, items2024, items2025) {
                 (${change >= 0 ? '+' : '-'}${changeText}) ${formatAmount(Math.abs(change))}
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 100px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 100px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 220px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 220px;"></canvas>
         </div>
     `;
     
@@ -723,8 +746,8 @@ function createComparisonCard(postData, items2024, items2025) {
         if (canvas && typeof Chart !== 'undefined') {
             // Set fixed dimensions before creating chart
             canvas.style.width = '100%';
-            canvas.style.height = '100px';
-            canvas.style.maxHeight = '100px';
+            canvas.style.height = '220px';
+            canvas.style.maxHeight = '220px';
             
                     createTrendChart(canvas, total2024, total2025, `Post ${postData.postNr} · ${postData.postNavn}`);
         }
@@ -742,17 +765,26 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
         canvas.chart.destroy();
     }
     
+    // High-resolution rendering
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    
     // Calculate min/max for y-axis scaling
     const minAmount = Math.min(amount2024, amount2025);
     const maxAmount = Math.max(amount2024, amount2025);
     const range = maxAmount - minAmount;
-    const padding = range * 0.1; // 10% padding
+    const padding = range * 0.15; // 15% padding for better visualization
     
     const yMin = Math.max(0, minAmount - padding);
     const yMax = maxAmount + padding;
     
-    // Format y-axis labels
-    function formatYLabel(value) {
+    // Format amounts for display
+    function formatAmount(value) {
         if (value >= 1000000000) {
             return (value / 1000000000).toFixed(1) + 'B';
         } else if (value >= 1000000) {
@@ -763,17 +795,26 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
         return value.toString();
     }
     
+    // Determine colors based on change
+    const isIncrease = amount2025 >= amount2024;
+    const lineColor = isIncrease ? '#2E7D32' : '#D32F2F'; // High contrast colors
+    const fillColor = isIncrease ? 'rgba(46, 125, 50, 0.1)' : 'rgba(211, 47, 47, 0.1)';
+    
     const chart = new Chart(ctx, {
-        type: 'bar', // Changed to bar chart for better comparison
+        type: 'line',
         data: {
             labels: ['2024', '2025'],
             datasets: [{
                 label: label,
                 data: [amount2024, amount2025],
-                backgroundColor: amount2025 >= amount2024 ? '#00aa00' : '#aa0000',
-                borderColor: amount2025 >= amount2024 ? '#00aa00' : '#aa0000',
-                borderWidth: 1,
-                borderRadius: 2
+                borderColor: lineColor,
+                backgroundColor: fillColor,
+                borderWidth: 3, // Thick line
+                tension: 0.1,
+                fill: true,
+                pointRadius: 0, // No data points
+                pointHoverRadius: 0,
+                pointStyle: 'circle'
             }]
         },
         options: {
@@ -789,7 +830,45 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
                     display: false
                 },
                 tooltip: {
-                    enabled: false
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: lineColor,
+                    borderWidth: 1,
+                    cornerRadius: 4,
+                    displayColors: false,
+                    titleFont: {
+                        size: 12,
+                        family: '"Times New Roman", Times, serif'
+                    },
+                    bodyFont: {
+                        size: 11,
+                        family: '"Times New Roman", Times, serif'
+                    },
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
+                        label: function(context) {
+                            return formatAmount(context.parsed.y) + ' kr';
+                        }
+                    }
+                },
+                datalabels: {
+                    display: typeof ChartDataLabels !== 'undefined',
+                    anchor: 'end',
+                    align: 'top',
+                    offset: 8,
+                    color: '#333333',
+                    font: {
+                        size: 10,
+                        family: '"Times New Roman", Times, serif',
+                        weight: 'bold'
+                    },
+                    formatter: function(value) {
+                        return formatAmount(value);
+                    }
                 }
             },
             scales: {
@@ -801,18 +880,18 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
                     grid: {
                         display: true,
                         color: '#e5e5e5',
-                        lineWidth: 0.5
+                        lineWidth: 1
                     },
                     ticks: {
                         display: true,
-                        maxTicksLimit: 3,
+                        maxTicksLimit: 4,
                         color: '#666666',
                         font: {
-                            size: 8,
+                            size: 10,
                             family: '"Times New Roman", Times, serif'
                         },
                         callback: function(value) {
-                            return formatYLabel(value);
+                            return formatAmount(value);
                         }
                     }
                 },
@@ -823,9 +902,9 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
                     },
                     ticks: {
                         display: true,
-                        color: '#666666',
+                        color: '#333333',
                         font: {
-                            size: 9,
+                            size: 11,
                             family: '"Times New Roman", Times, serif',
                             weight: 'bold'
                         }
@@ -833,8 +912,14 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
                 }
             },
             elements: {
-                bar: {
-                    borderWidth: 1
+                point: {
+                    radius: 0,
+                    hoverRadius: 0,
+                    borderWidth: 0
+                },
+                line: {
+                    tension: 0.1,
+                    borderWidth: 3
                 }
             }
         }

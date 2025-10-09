@@ -442,7 +442,7 @@ main {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    min-height: 180px;
+    min-height: 200px;
     align-items: stretch;
     font-size: 10px;
     line-height: 1.2;
