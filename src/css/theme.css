@@ -4,21 +4,22 @@
   /* Native hint */
   color-scheme: light;
   
-  /* Typography */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  /* Typography - SEC Filing Style */
+  --font-serif: "Times New Roman", Times, serif;
+  --font-sans: "Times New Roman", Times, serif;
   
   /* Size & radii */
   --radius: 14px;
   --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
   --shadow-md: 0 6px 16px rgba(0,0,0,.08);
   
-  /* Light palette (OKLCH with hex fallbacks) */
-  --bg: oklch(99% 0.01 95); /* #f9fafb fallback */
-  --bg-elev: oklch(97% 0.02 95); /* #f3f4f6 */
-  --card: oklch(98% 0.015 95); /* #f7f8fa */
-  --border: oklch(88% 0.02 95); /* #e5e7eb */
-  --text: oklch(28% 0.02 95); /* #1f2937 */
-  --text-muted: oklch(45% 0.02 95); /* #6b7280 */
+  /* SEC Filing Light palette */
+  --bg: #ffffff; /* Pure white background */
+  --bg-elev: #f8f9fa; /* Very light gray */
+  --card: #ffffff; /* White cards */
+  --border: #000000; /* Black borders */
+  --text: #000000; /* Black text */
+  --text-muted: #333333; /* Dark gray for secondary text */
   
   /* Accents – Norwegian state colors */
   --accent: oklch(63% 0.13 235); /* #3b82f6-ish blue */
@@ -53,17 +54,17 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --bg: oklch(17% 0.02 95);
-  --bg-elev: oklch(22% 0.02 95);
-  --card: oklch(20% 0.02 95);
-  --border: oklch(28% 0.02 95);
-  --text: oklch(95% 0.01 95);
-  --text-muted: oklch(78% 0.02 95);
-  --accent: oklch(65% 0.14 235);
-  --accent-2: oklch(75% 0.13 150);
-  --accent-3: oklch(72% 0.11 30);
-  --accent-4: oklch(67% 0.11 280);
-  --grid: oklch(35% 0.01 95);
+  --bg: #1a1a1a;
+  --bg-elev: #2a2a2a;
+  --card: #1a1a1a;
+  --border: #ffffff;
+  --text: #ffffff;
+  --text-muted: #cccccc;
+  --accent: #0066cc;
+  --accent-2: #006600;
+  --accent-3: #cc6600;
+  --accent-4: #6600cc;
+  --grid: #333333;
   --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
   --shadow-md: 0 10px 24px rgba(0,0,0,.45);
 }
