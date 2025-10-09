@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GitHub Pages Test</title>
+</head>
+<body>
+    <h1>GitHub Pages Test</h1>
+    <p>If you can see this, GitHub Pages is working!</p>
+    
+    <h2>File Tests:</h2>
+    <ul>
+        <li><a href="./data/json/20241002_gulbok_data_til_publ.json">2025 Data</a></li>
+        <li><a href="./data/json/gul_bok_2024_datagrunnlag.json">2024 Data</a></li>
+        <li><a href="./src/css/main.css">Main CSS</a></li>
+        <li><a href="./src/js/main.js">Main JS</a></li>
+    </ul>
+    
+    <h2>JSON Test:</h2>
+    <div id="json-test">Loading...</div>
+    
+    <script>
+        // Test if JSON files are accessible
+        fetch('./data/json/20241002_gulbok_data_til_publ.json')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(data => {
+                document.getElementById('json-test').innerHTML = 
+                    `✅ JSON loaded successfully! Found ${Object.keys(data).length} keys: ${Object.keys(data).join(', ')}`;
+            })
+            .catch(error => {
+                document.getElementById('json-test').innerHTML = 
+                    `❌ JSON failed to load: ${error.message}`;
+            });
+    </script>
+</body>
+</html>
