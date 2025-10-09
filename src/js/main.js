@@ -221,8 +221,13 @@ async function loadBudgetData() {
         // Setup navigation
         setupNavigation();
         
-        // Set default active state to "Alle"
-        document.querySelector('.nav-link[data-category="all"]').classList.add('active');
+        // Set default active state to "Alle" - wait for navigation to be created
+        setTimeout(() => {
+            const alleButton = document.querySelector('.nav-link[data-department="all"]');
+            if (alleButton) {
+                alleButton.classList.add('active');
+            }
+        }, 100);
         
         // Always show comparison view (both years)
         
