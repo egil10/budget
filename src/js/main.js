@@ -136,22 +136,73 @@ function initSort() {
 async function loadBudgetData() {
     try {
         console.log('Loading budget data...');
+        console.log('Current URL:', window.location.href);
         
         // Load 2025 budget
-        const response2025 = await fetch('./data/json/20241002_gulbok_data_til_publ.json');
-        if (!response2025.ok) {
-            throw new Error(`HTTP error loading 2025 data! status: ${response2025.status}`);
+        console.log('Fetching 2025 data from: /data/json/20241002_gulbok_data_til_publ.json');
+        let response2025;
+        try {
+            response2025 = await fetch('/data/json/20241002_gulbok_data_til_publ.json');
+        } catch (fetchError) {
+            console.error('Fetch error for 2025 data:', fetchError);
+            throw new Error(`Network error loading 2025 data: ${fetchError.message}`);
         }
-        const data2025 = await response2025.json();
+        
+        console.log('2025 response status:', response2025.status, response2025.statusText);
+        
+        if (!response2025.ok) {
+            throw new Error(`HTTP error loading 2025 data! status: ${response2025.status} ${response2025.statusText}`);
+        }
+        
+        let data2025;
+        try {
+            data2025 = await response2025.json();
+        } catch (jsonError) {
+            console.error('JSON parse error for 2025 data:', jsonError);
+            throw new Error(`JSON parse error for 2025 data: ${jsonError.message}`);
+        }
+        
+        console.log('2025 data structure:', Object.keys(data2025));
+        console.log('2025 Data array length:', data2025.Data ? data2025.Data.length : 'No Data key');
+        
+        if (!data2025.Data && !Array.isArray(data2025)) {
+            throw new Error('2025 data does not contain expected Data array');
+        }
+        
         budgetData['2025'] = (data2025.Data || data2025).map(item => ({ ...item, year: 2025 }));
         console.log(`Loaded ${budgetData['2025'].length} budget items for 2025`);
         
         // Load 2024 budget
-        const response2024 = await fetch('./data/json/gul_bok_2024_datagrunnlag.json');
-        if (!response2024.ok) {
-            throw new Error(`HTTP error loading 2024 data! status: ${response2024.status}`);
+        console.log('Fetching 2024 data from: /data/json/gul_bok_2024_datagrunnlag.json');
+        let response2024;
+        try {
+            response2024 = await fetch('/data/json/gul_bok_2024_datagrunnlag.json');
+        } catch (fetchError) {
+            console.error('Fetch error for 2024 data:', fetchError);
+            throw new Error(`Network error loading 2024 data: ${fetchError.message}`);
         }
-        const data2024 = await response2024.json();
+        
+        console.log('2024 response status:', response2024.status, response2024.statusText);
+        
+        if (!response2024.ok) {
+            throw new Error(`HTTP error loading 2024 data! status: ${response2024.status} ${response2024.statusText}`);
+        }
+        
+        let data2024;
+        try {
+            data2024 = await response2024.json();
+        } catch (jsonError) {
+            console.error('JSON parse error for 2024 data:', jsonError);
+            throw new Error(`JSON parse error for 2024 data: ${jsonError.message}`);
+        }
+        
+        console.log('2024 data structure:', Object.keys(data2024));
+        console.log('2024 Data array length:', data2024.Data ? data2024.Data.length : 'No Data key');
+        
+        if (!data2024.Data && !Array.isArray(data2024)) {
+            throw new Error('2024 data does not contain expected Data array');
+        }
+        
         budgetData['2024'] = (data2024.Data || data2024).map(item => ({ ...item, year: 2024 }));
         console.log(`Loaded ${budgetData['2024'].length} budget items for 2024`);
         
@@ -171,9 +222,12 @@ async function loadBudgetData() {
         // Render initial data
         renderBudgetData();
         
+        console.log('Budget data loaded successfully!');
+        
     } catch (error) {
         console.error('Error loading budget data:', error);
-        showError('Kunne ikke laste budsjettdata. Vennligst prøv igjen senere.');
+        console.error('Error details:', error.message);
+        showError(`Kunne ikke laste budsjettdata: ${error.message}`);
     }
 }
 
@@ -603,6 +657,9 @@ function showError(message) {
             <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--danger);">
                 <h3>Feil</h3>
                 <p>${message}</p>
+                <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.8;">
+                    Sjekk konsollen for flere detaljer (F12 → Console)
+                </p>
             </div>
         `;
     }

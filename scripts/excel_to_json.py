@@ -5,6 +5,7 @@ import pandas as pd
 import json
 import os
 from pathlib import Path
+import numpy as np
 
 def convert_excel_to_json(excel_path, json_path):
     """
@@ -27,6 +28,19 @@ def convert_excel_to_json(excel_path, json_path):
         # Convert to JSON with proper handling of NaN values
         data = df.to_dict(orient='records')
         
+        # Clean NaN values
+        def clean_nan_values(obj):
+            if isinstance(obj, dict):
+                return {k: clean_nan_values(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [clean_nan_values(item) for item in obj]
+            elif pd.isna(obj):
+                return None
+            else:
+                return obj
+        
+        data = clean_nan_values(data)
+        
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2, default=str)
         
@@ -37,7 +51,20 @@ def convert_excel_to_json(excel_path, json_path):
         all_sheets = {}
         for sheet_name in excel_file.sheet_names:
             df = pd.read_excel(excel_path, sheet_name=sheet_name)
-            all_sheets[sheet_name] = df.to_dict(orient='records')
+            sheet_data = df.to_dict(orient='records')
+            
+            # Clean NaN values
+            def clean_nan_values(obj):
+                if isinstance(obj, dict):
+                    return {k: clean_nan_values(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [clean_nan_values(item) for item in obj]
+                elif pd.isna(obj):
+                    return None
+                else:
+                    return obj
+            
+            all_sheets[sheet_name] = clean_nan_values(sheet_data)
             print(f"  [OK] Processed sheet: {sheet_name} (Rows: {len(df)}, Columns: {len(df.columns)})")
         
         # Save combined file with all sheets
