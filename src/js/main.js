@@ -190,17 +190,6 @@ async function loadBudgetData() {
         }
         
         budgetData['2025'] = (data2025.Data || data2025).map(item => ({ ...item, year: 2025 }));
-        
-        // Merge OLJE- OG ENERGIDEPARTEMENTET with Energidepartementet
-        budgetData['2024'] = budgetData['2024'].map(item => ({
-            ...item,
-            fdep_navn: item.fdep_navn === 'Olje- og energidepartementet' ? 'Energidepartementet' : item.fdep_navn
-        }));
-        budgetData['2025'] = budgetData['2025'].map(item => ({
-            ...item,
-            fdep_navn: item.fdep_navn === 'Olje- og energidepartementet' ? 'Energidepartementet' : item.fdep_navn
-        }));
-        
         console.log(`Loaded ${budgetData['2025'].length} budget items for 2025`);
         
         // Load 2024 budget
@@ -236,6 +225,16 @@ async function loadBudgetData() {
         
         budgetData['2024'] = (data2024.Data || data2024).map(item => ({ ...item, year: 2024 }));
         console.log(`Loaded ${budgetData['2024'].length} budget items for 2024`);
+        
+        // Merge OLJE- OG ENERGIDEPARTEMENTET with Energidepartementet
+        budgetData['2024'] = budgetData['2024'].map(item => ({
+            ...item,
+            fdep_navn: item.fdep_navn === 'Olje- og energidepartementet' ? 'Energidepartementet' : item.fdep_navn
+        }));
+        budgetData['2025'] = budgetData['2025'].map(item => ({
+            ...item,
+            fdep_navn: item.fdep_navn === 'Olje- og energidepartementet' ? 'Energidepartementet' : item.fdep_navn
+        }));
         
         // Combine datasets
         budgetData.combined = [...budgetData['2024'], ...budgetData['2025']];
@@ -569,8 +568,8 @@ function createDepartmentAggregateCard(deptData) {
                 (${change >= 0 ? '+' : ''}${changePercent}) ${formatAmount(Math.abs(change))}
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 220px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 220px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 280px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 280px;"></canvas>
         </div>
     `;
     
@@ -600,8 +599,8 @@ function createDepartmentAggregateCard(deptData) {
         const canvas = card.querySelector('.trend-chart');
         if (canvas && typeof Chart !== 'undefined') {
             canvas.style.width = '100%';
-            canvas.style.height = '220px';
-            canvas.style.maxHeight = '220px';
+            canvas.style.height = '280px';
+            canvas.style.maxHeight = '280px';
             createTrendChart(canvas, total2024, total2025, deptData.name);
         }
     }, 100);
@@ -735,8 +734,8 @@ function createComparisonCard(postData, items2024, items2025) {
                 (${change >= 0 ? '+' : '-'}${changeText}) ${formatAmount(Math.abs(change))}
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 220px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 220px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 280px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 280px;"></canvas>
         </div>
     `;
     
@@ -746,8 +745,8 @@ function createComparisonCard(postData, items2024, items2025) {
         if (canvas && typeof Chart !== 'undefined') {
             // Set fixed dimensions before creating chart
             canvas.style.width = '100%';
-            canvas.style.height = '220px';
-            canvas.style.maxHeight = '220px';
+            canvas.style.height = '280px';
+            canvas.style.maxHeight = '280px';
             
                     createTrendChart(canvas, total2024, total2025, `Post ${postData.postNr} · ${postData.postNavn}`);
         }
@@ -831,44 +830,33 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
                 },
                 tooltip: {
                     enabled: true,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#ffffff',
-                    bodyColor: '#ffffff',
-                    borderColor: lineColor,
-                    borderWidth: 1,
-                    cornerRadius: 4,
+                    backgroundColor: 'transparent',
+                    titleColor: 'transparent',
+                    bodyColor: '#333333',
+                    borderColor: 'transparent',
+                    borderWidth: 0,
+                    cornerRadius: 0,
                     displayColors: false,
+                    padding: 0,
                     titleFont: {
-                        size: 12,
-                        family: '"Times New Roman", Times, serif'
+                        size: 0
                     },
                     bodyFont: {
-                        size: 11,
-                        family: '"Times New Roman", Times, serif'
-                    },
-                    callbacks: {
-                        title: function(context) {
-                            return context[0].label;
-                        },
-                        label: function(context) {
-                            return formatAmount(context.parsed.y) + ' kr';
-                        }
-                    }
-                },
-                datalabels: {
-                    display: typeof ChartDataLabels !== 'undefined',
-                    anchor: 'end',
-                    align: 'top',
-                    offset: 8,
-                    color: '#333333',
-                    font: {
                         size: 10,
                         family: '"Times New Roman", Times, serif',
                         weight: 'bold'
                     },
-                    formatter: function(value) {
-                        return formatAmount(value);
+                    callbacks: {
+                        title: function(context) {
+                            return '';
+                        },
+                        label: function(context) {
+                            return formatAmount(context.parsed.y);
+                        }
                     }
+                },
+                datalabels: {
+                    display: false
                 }
             },
             scales: {
