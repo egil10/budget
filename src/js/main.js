@@ -715,6 +715,50 @@ function showError(message) {
     hideLoadingScreen();
 }
 
+// Update navigation with actual departments
+function updateNavigationWithDepartments(departments) {
+    const navList = document.querySelector('.nav-list');
+    if (!navList) return;
+    
+    // Clear existing nav items except the first "Alle" button
+    const alleButton = navList.querySelector('.nav-item:first-child');
+    navList.innerHTML = '';
+    navList.appendChild(alleButton);
+    
+    // Add department filter buttons
+    departments.forEach(dept => {
+        const navItem = document.createElement('li');
+        navItem.className = 'nav-item';
+        navItem.innerHTML = `
+            <a href="#" class="nav-link" data-department="${dept}">${dept}</a>
+        `;
+        navList.appendChild(navItem);
+    });
+    
+    // Add search and sort at the end
+    const searchItem = document.createElement('li');
+    searchItem.className = 'nav-item';
+    searchItem.innerHTML = `
+        <div class="search-container">
+            <input type="text" id="headerSearch" placeholder="Søk..." class="nav-search-input">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+            </svg>
+        </div>
+    `;
+    navList.appendChild(searchItem);
+    
+    const sortItem = document.createElement('li');
+    sortItem.className = 'nav-item';
+    sortItem.innerHTML = `
+        <button id="headerSortToggle" class="nav-sort-btn" aria-label="Sorter alfabetisk" title="Sorter alfabetisk">
+            <span id="sortText">A-Z</span>
+        </button>
+    `;
+    navList.appendChild(sortItem);
+}
+
 console.log('Budget Dashboard main.js loaded');
 
 
