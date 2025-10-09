@@ -753,10 +753,11 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     // Clear existing content
     container.innerHTML = '';
     
-    // Calculate dimensions - much wider SVG for wider line
-    const width = 200; // Much wider SVG
-    const height = 80; 
-    const padding = 15;
+    // Calculate dimensions - maximize chart area
+    const width = 300; // Even wider SVG
+    const height = 100; // Taller SVG
+    const padding = 10; // Minimal padding to maximize chart area
+    const bottomPadding = 15; // Extra padding at bottom for x-axis labels
     
     // Calculate min/max for scaling
     const minAmount = Math.min(amount2024, amount2025);
@@ -784,22 +785,22 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     const lineColor = isIncrease ? '#2E7D32' : '#C62828';
     const fillColor = isIncrease ? '#2E7D32' : '#C62828';
     
-    // Calculate positions - now with much wider SVG
-    const x1 = 20; // Left side of wider SVG
-    const x2 = 180; // Right side of wider SVG
-    const y1 = height - padding - ((amount2024 - yMin) / (yMax - yMin)) * (height - 2 * padding);
-    const y2 = height - padding - ((amount2025 - yMin) / (yMax - yMin)) * (height - 2 * padding);
+    // Calculate positions - start line to the right of y-axis labels
+    const x1 = 25; // Start to the right of y-axis labels
+    const x2 = 285; // Very close to right edge
+    const y1 = height - bottomPadding - ((amount2024 - yMin) / (yMax - yMin)) * (height - padding - bottomPadding);
+    const y2 = height - bottomPadding - ((amount2025 - yMin) / (yMax - yMin)) * (height - padding - bottomPadding);
     
-    // Create SVG chart with proper aspect ratio
+    // Create SVG chart that fills the container exactly
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 200 80');
-    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.setAttribute('viewBox', '0 0 300 100');
+    svg.setAttribute('preserveAspectRatio', 'none');
     svg.style.width = '100%';
     svg.style.height = '100%';
     
     // Create filled area path
     const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const areaD = `M ${x1} ${height - padding} L ${x1} ${y1} L ${x2} ${y2} L ${x2} ${height - padding} Z`;
+    const areaD = `M ${x1} ${height - bottomPadding} L ${x1} ${y1} L ${x2} ${y2} L ${x2} ${height - bottomPadding} Z`;
     areaPath.setAttribute('d', areaD);
     areaPath.setAttribute('fill', fillColor);
     areaPath.setAttribute('fill-opacity', '0.15');
@@ -817,9 +818,9 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     line.setAttribute('stroke-linecap', 'round');
     svg.appendChild(line);
     
-    // Add grid lines - span the wider chart area
+    // Add grid lines - span the chart area starting from x1
     for (let i = 1; i < 2; i++) {
-        const gridY = padding + (i * (height - 2 * padding) / 2);
+        const gridY = padding + (i * (height - padding - bottomPadding) / 2);
         const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         gridLine.setAttribute('x1', x1);
         gridLine.setAttribute('y1', gridY);
@@ -830,13 +831,28 @@ function createHTMLChart(container, amount2024, amount2025, label) {
         svg.appendChild(gridLine);
     }
     
-    // Add axis labels - positioned at line endpoints
+    // Add axis labels - positioned at line endpoints with smart padding
     const yLabels = ['2024', '2025'];
     yLabels.forEach((label, index) => {
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', index === 0 ? x1 : x2);
-        text.setAttribute('y', height - padding + 8);
-        text.setAttribute('text-anchor', 'middle');
+        // Move x-axis labels slightly to the right for better alignment
+        text.setAttribute('x', index === 0 ? x1 + 3 : x2 + 3);
+        // Position at bottom of chart area
+        text.setAttribute('y', height - 5);
+        
+        // Smart text alignment: first=left, last=right, middle=middle
+        let textAnchor;
+        if (yLabels.length === 1) {
+            textAnchor = 'middle'; // Single label
+        } else if (index === 0) {
+            textAnchor = 'start'; // First label - left aligned
+        } else if (index === yLabels.length - 1) {
+            textAnchor = 'end'; // Last label - right aligned
+        } else {
+            textAnchor = 'middle'; // Middle labels - center aligned
+        }
+        
+        text.setAttribute('text-anchor', textAnchor);
         text.setAttribute('font-family', 'Times New Roman, Times, serif');
         text.setAttribute('font-size', '9');
         text.setAttribute('font-weight', 'bold');
@@ -845,15 +861,15 @@ function createHTMLChart(container, amount2024, amount2025, label) {
         svg.appendChild(text);
     });
     
-    // Add y-axis labels - fewer labels to prevent overcrowding
+    // Add y-axis labels - positioned with smart padding to avoid line overlap
     for (let i = 0; i <= 2; i++) {
         const value = yMin + (i * (yMax - yMin) / 2);
-        const y = height - padding - (i * (height - 2 * padding) / 2);
+        const y = height - bottomPadding - (i * (height - padding - bottomPadding) / 2);
         
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', padding - 4);
+        text.setAttribute('x', 2); // Even closer to left edge
         text.setAttribute('y', y + 3);
-        text.setAttribute('text-anchor', 'end');
+        text.setAttribute('text-anchor', 'start'); // Left-align
         text.setAttribute('font-family', 'Times New Roman, Times, serif');
         text.setAttribute('font-size', '7');
         text.setAttribute('fill', '#666666');
@@ -862,45 +878,6 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     }
     
     container.appendChild(svg);
-    
-    // Add hover tooltip
-    const tooltip = document.createElement('div');
-    tooltip.style.cssText = `
-        position: absolute;
-        background: transparent;
-        color: #333333;
-        font-family: 'Times New Roman', Times, serif;
-        font-size: 10px;
-        font-weight: bold;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.2s;
-        z-index: 1000;
-    `;
-    container.appendChild(tooltip);
-    
-    // Add hover events
-    svg.addEventListener('mouseenter', (e) => {
-        const rect = container.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        // Determine which point is closer
-        const distTo2024 = Math.abs(x - (padding * container.offsetWidth / 100));
-        const distTo2025 = Math.abs(x - ((width - padding) * container.offsetWidth / 100));
-        
-        const value = distTo2024 < distTo2025 ? amount2024 : amount2025;
-        const year = distTo2024 < distTo2025 ? '2024' : '2025';
-        
-        tooltip.textContent = formatAmount(value);
-        tooltip.style.left = x + 'px';
-        tooltip.style.top = (y - 20) + 'px';
-        tooltip.style.opacity = '1';
-    });
-    
-    svg.addEventListener('mouseleave', () => {
-        tooltip.style.opacity = '0';
-    });
     
     return svg;
 }
