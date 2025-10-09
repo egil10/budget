@@ -245,7 +245,8 @@ function setupNavigation() {
     if (!budgetData.combined || budgetData.combined.length === 0) return;
     
     // Get unique fdep_navn (actual departments) for filter buttons
-    const uniqueDepartments = [...new Set(budgetData.combined.map(item => item.fdep_navn))].filter(Boolean).sort();
+    // Clean up department names (remove leading/trailing spaces) and remove duplicates
+    const uniqueDepartments = [...new Set(budgetData.combined.map(item => item.fdep_navn?.trim()).filter(Boolean))].sort();
     
     console.log('Unique departments (fdep_navn):', uniqueDepartments);
     console.log('Department count:', uniqueDepartments.length);
