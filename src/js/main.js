@@ -571,8 +571,8 @@ function createComparisonCard(postData, items2024, items2025) {
                 ${formatAmount(Math.abs(change))}
             </div>
         </div>
-        <div class="chart-wrapper" style="margin-top: 0.5rem; height: 50px; position: relative; overflow: hidden;">
-            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 50px;"></canvas>
+        <div class="chart-wrapper" style="margin-top: 0.25rem; height: 80px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 80px;"></canvas>
         </div>
     `;
     
@@ -582,8 +582,8 @@ function createComparisonCard(postData, items2024, items2025) {
         if (canvas && typeof Chart !== 'undefined') {
             // Set fixed dimensions before creating chart
             canvas.style.width = '100%';
-            canvas.style.height = '50px';
-            canvas.style.maxHeight = '50px';
+            canvas.style.height = '80px';
+            canvas.style.maxHeight = '80px';
             
                     createTrendChart(canvas, total2024, total2025, `Post ${postData.postNr} · ${postData.postNavn}`);
         }
