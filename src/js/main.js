@@ -506,24 +506,17 @@ function createComparisonCard(deptName, chapName, items2024, items2025) {
             <div class="budget-card-subtitle">${deptName}</div>
         </div>
         <div class="year-comparison">
-            <div class="year-row">
-                <span class="year-label">2024:</span>
-                <span class="year-amount">${formatAmount(total2024)}</span>
-            </div>
-            <div class="year-row">
-                <span class="year-label">2025:</span>
-                <span class="year-amount">${formatAmount(total2025)}</span>
-            </div>
-            <div class="change-indicator" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
+            <div class="year-label">2024</div>
+            <div class="year-amount">${formatAmount(total2024)}</div>
+            <div class="year-label">2025</div>
+            <div class="year-amount">${formatAmount(total2025)}</div>
+            <div class="year-label"></div>
+            <div class="change-percentage" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
                 ${change >= 0 ? '↑' : '↓'} ${changeText}
             </div>
-        </div>
-        <div class="budget-details">
-            <div class="budget-detail-row">
-                <span class="budget-detail-label">Net Change:</span>
-                <span class="budget-detail-value" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
-                    ${formatAmount(Math.abs(change))} ${changeText}
-                </span>
+            <div class="net-change-label">NET CHANGE</div>
+            <div class="net-change-value" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
+                ${formatAmount(Math.abs(change))}
             </div>
         </div>
         <div class="chart-wrapper" style="margin-top: 0.5rem; height: 50px; position: relative; overflow: hidden;">

@@ -381,19 +381,18 @@ main {
     background: #ffffff;
 }
 
-/* Year Comparison Layout - ULTRA MINIMAL */
+/* Year Comparison Layout - 2 Column Table */
 .year-comparison {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.25rem;
     margin-bottom: 0.5rem;
+    font-size: 11px;
+    font-family: "Times New Roman", Times, serif;
 }
 
 .year-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.125rem 0;
+    display: contents;
 }
 
 .year-label {
@@ -403,6 +402,7 @@ main {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-family: "Times New Roman", Times, serif;
+    padding: 0.125rem 0;
 }
 
 .year-amount {
@@ -411,18 +411,34 @@ main {
     color: #000000;
     font-family: "Times New Roman", Times, serif;
     text-align: right;
+    padding: 0.125rem 0;
 }
 
-.change-indicator {
+.change-percentage {
     font-size: 10px;
     font-weight: 700;
-    padding: 0.25rem 0.5rem;
-    white-space: nowrap;
-    text-align: center;
-    border: 0.5px solid #000000;
-    background: #ffffff;
+    color: #000000;
     font-family: "Times New Roman", Times, serif;
-    margin: 0.25rem 0;
+    text-align: right;
+    padding: 0.125rem 0;
+}
+
+.net-change-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: "Times New Roman", Times, serif;
+    padding: 0.125rem 0;
+}
+
+.net-change-value {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: "Times New Roman", Times, serif;
+    text-align: right;
+    padding: 0.125rem 0;
 }
 
 .comparison-card {
@@ -472,37 +488,7 @@ main {
 }
 
 .budget-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: 10px;
-    flex-grow: 1;
-    margin-top: 0.5rem;
-}
-
-.budget-detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.125rem 0;
-}
-
-.budget-detail-label {
-    color: #000000;
-    font-weight: 400;
-    text-transform: uppercase;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    font-family: "Times New Roman", Times, serif;
-}
-
-.budget-detail-value {
-    font-weight: 700;
-    color: #000000;
-    font-family: "Times New Roman", Times, serif;
-    text-align: right;
-    font-size: 10px;
-    word-break: break-all;
+    display: none;
 }
 
 /* Chart Container */
