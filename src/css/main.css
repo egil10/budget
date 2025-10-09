@@ -162,7 +162,7 @@ body {
     font-size: 8px;
     color: #666666;
     font-family: "Times New Roman", Times, serif;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.125rem;
     line-height: 1.2;
 }
 
@@ -495,7 +495,7 @@ main {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.25rem;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.125rem;
     font-size: 11px;
     font-family: "Times New Roman", Times, serif;
 }
@@ -617,7 +617,7 @@ main {
 /* Chart Wrapper - ULTRA MINIMAL */
 .chart-wrapper {
     position: relative;
-    height: 80px !important;
+    height: 100px !important;
     width: 100%;
     overflow: hidden;
     flex-shrink: 0;
@@ -628,9 +628,9 @@ main {
 
 .chart-wrapper canvas {
     width: 100% !important;
-    height: 80px !important;
-    max-height: 80px !important;
-    min-height: 80px !important;
+    height: 100px !important;
+    max-height: 100px !important;
+    min-height: 100px !important;
 }
 
 /* Loading Screen - SEC Filing Style */
