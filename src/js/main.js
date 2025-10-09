@@ -520,13 +520,20 @@ function createComparisonCard(chapterData, items2024, items2025) {
         changeText = changePercent;
     }
     
+    // Get unique posts for this chapter
+    const allItems = [...items2024, ...items2025];
+    const uniquePosts = [...new Set(allItems.map(item => `${item.post_nr} · ${item.post_navn}`))];
+    
     // Get department color
-    const color = DEPARTMENT_COLORS[deptName] || '#3b82f6';
+    const color = DEPARTMENT_COLORS[chapterData.gdepNavn] || '#3b82f6';
     
     card.innerHTML = `
         <div class="budget-card-header">
-            <h3>${chapName}</h3>
-            <div class="budget-card-subtitle">${deptName}</div>
+            <h3>Kap. ${chapterData.kapNr} · ${chapterData.kapNavn}</h3>
+            <div class="budget-card-subtitle">${chapterData.gdepNavn}</div>
+        </div>
+        <div class="post-badges">
+            ${uniquePosts.map(post => `<span class="post-badge">Post ${post}</span>`).join('')}
         </div>
         <div class="year-comparison">
             <div class="year-label">2024</div>
