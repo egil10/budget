@@ -485,25 +485,25 @@ function groupByDepartmentAndChapter(data) {
 function renderComparisonView(filtered) {
     const grid = document.getElementById('budgetGrid');
     
-    // Group by department and chapter
-    const groupedByChapter = {};
+    // Group by fdep_navn (actual department) and kat_navn (category)
+    const groupedByCategory = {};
     
     filtered.forEach(item => {
-        const key = `${item.gdep_navn}|||${item.kap_navn}`;
-        if (!groupedByChapter[key]) {
-            groupedByChapter[key] = {
-                deptName: item.gdep_navn,
-                chapName: item.kap_navn,
+        const key = `${item.fdep_navn}|||${item.kat_navn}`;
+        if (!groupedByCategory[key]) {
+            groupedByCategory[key] = {
+                deptName: item.fdep_navn,
+                catName: item.kat_navn,
                 '2024': [],
                 '2025': []
             };
         }
-        groupedByChapter[key][item.year].push(item);
+        groupedByCategory[key][item.year].push(item);
     });
     
     // Group by department for section headers
     const groupedByDepartment = {};
-    Object.values(groupedByChapter).forEach(data => {
+    Object.values(groupedByCategory).forEach(data => {
         const deptName = data.deptName;
         if (!groupedByDepartment[deptName]) {
             groupedByDepartment[deptName] = [];
@@ -512,7 +512,7 @@ function renderComparisonView(filtered) {
     });
     
     // Create department sections
-    Object.entries(groupedByDepartment).forEach(([deptName, chapters]) => {
+    Object.entries(groupedByDepartment).forEach(([deptName, categories]) => {
         // Create department header
         const section = document.createElement('div');
         section.className = 'department-section';
@@ -524,12 +524,12 @@ function renderComparisonView(filtered) {
         `;
         section.appendChild(header);
         
-        // Create cards for this department in 4-column grid
+        // Create cards for this department in 3-column grid
         const deptGrid = document.createElement('div');
         deptGrid.className = 'department-grid';
         
-        chapters.forEach(data => {
-            const card = createComparisonCard(data.deptName, data.chapName, data['2024'], data['2025']);
+        categories.forEach(data => {
+            const card = createComparisonCard(data.deptName, data.catName, data['2024'], data['2025']);
             deptGrid.appendChild(card);
         });
         
