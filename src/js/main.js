@@ -562,13 +562,9 @@ function createComparisonCard(postData, items2024, items2025) {
             <div class="year-amount">${formatAmount(total2024)}</div>
             <div class="year-label">2025</div>
             <div class="year-amount">${formatAmount(total2025)}</div>
-            <div class="year-label"></div>
-            <div class="change-percentage" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
-                ${change >= 0 ? '↑' : '↓'} ${changeText}
-            </div>
             <div class="net-change-label">NET CHANGE</div>
             <div class="net-change-value" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
-                ${formatAmount(Math.abs(change))}
+                ${change >= 0 ? '↑' : '↓'} ${changeText} ${formatAmount(Math.abs(change))}
             </div>
         </div>
         <div class="chart-wrapper" style="margin-top: 0.125rem; height: 100px; position: relative; overflow: hidden;">
