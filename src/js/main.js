@@ -614,21 +614,22 @@ function createDepartmentAggregateCard(deptData) {
         }
         .budget-card {
             border: 1px solid #000000;
-            padding: 20px;
-            max-width: 400px;
+            padding: 30px;
+            max-width: 90vw;
             margin: 0 auto;
             background: #ffffff;
+            min-height: 60vh;
         }
         .budget-card-header-left h3 {
-            font-size: 14px;
+            font-size: 24px;
             font-weight: 700;
             color: #000000;
-            margin: 0 0 5px 0;
+            margin: 0 0 10px 0;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
         .budget-card-subtitle {
-            font-size: 10px;
+            font-size: 16px;
             color: #000000;
             font-weight: 400;
             text-transform: uppercase;
@@ -637,9 +638,9 @@ function createDepartmentAggregateCard(deptData) {
         .year-comparison {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 20px 0;
-            font-size: 12px;
+            gap: 20px;
+            margin: 30px 0;
+            font-size: 20px;
         }
         .year-label {
             font-weight: 700;
@@ -649,27 +650,40 @@ function createDepartmentAggregateCard(deptData) {
         .year-amount {
             font-weight: 700;
             color: #000000;
+            font-size: 24px;
         }
         .net-change-label {
             grid-column: 1 / -1;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-top: 10px;
+            margin-top: 20px;
+            font-size: 18px;
         }
         .net-change-value {
             grid-column: 1 / -1;
             font-weight: 700;
-            margin-top: 5px;
+            margin-top: 10px;
+            font-size: 22px;
         }
         .chart-wrapper {
-            height: 200px;
+            height: 38vh;
             border: 1px solid #e5e5e5;
             margin-top: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #f9f9f9;
+            min-height: 260px;
+        }
+        .html-chart {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: none !important;
+        }
+        .html-chart svg {
+            width: 100% !important;
+            height: 100% !important;
         }
         .chart-placeholder {
             text-align: center;
@@ -847,8 +861,8 @@ function createComparisonCard(postData, items2024, items2025) {
     card.innerHTML = `
         <div class="budget-card-header">
             <div class="budget-card-header-left">
-                <h3>${postData.postNavn} (Post ${postData.postNr})</h3>
-                <div class="budget-card-subtitle">${postData.kapNavn} (Kap. ${postData.kapNr})</div>
+            <h3>${postData.postNavn} (Post ${postData.postNr})</h3>
+            <div class="budget-card-subtitle">${postData.kapNavn} (Kap. ${postData.kapNr})</div>
             </div>
             <button class="download-btn" title="Download as HTML">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -907,21 +921,22 @@ function createComparisonCard(postData, items2024, items2025) {
         }
         .budget-card {
             border: 1px solid #000000;
-            padding: 20px;
-            max-width: 400px;
+            padding: 30px;
+            max-width: 90vw;
             margin: 0 auto;
             background: #ffffff;
+            min-height: 60vh;
         }
         .budget-card-header-left h3 {
-            font-size: 14px;
+            font-size: 24px;
             font-weight: 700;
             color: #000000;
-            margin: 0 0 5px 0;
+            margin: 0 0 10px 0;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
         .budget-card-subtitle {
-            font-size: 10px;
+            font-size: 16px;
             color: #000000;
             font-weight: 400;
             text-transform: uppercase;
@@ -936,9 +951,9 @@ function createComparisonCard(postData, items2024, items2025) {
         .year-comparison {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 20px 0;
-            font-size: 12px;
+            gap: 20px;
+            margin: 30px 0;
+            font-size: 20px;
         }
         .year-label {
             font-weight: 700;
@@ -948,27 +963,40 @@ function createComparisonCard(postData, items2024, items2025) {
         .year-amount {
             font-weight: 700;
             color: #000000;
+            font-size: 24px;
         }
         .net-change-label {
             grid-column: 1 / -1;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-top: 10px;
+            margin-top: 20px;
+            font-size: 18px;
         }
         .net-change-value {
             grid-column: 1 / -1;
             font-weight: 700;
-            margin-top: 5px;
+            margin-top: 10px;
+            font-size: 22px;
         }
         .chart-wrapper {
-            height: 200px;
+            height: 38vh;
             border: 1px solid #e5e5e5;
             margin-top: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #f9f9f9;
+            min-height: 260px;
+        }
+        .html-chart {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: none !important;
+        }
+        .html-chart svg {
+            width: 100% !important;
+            height: 100% !important;
         }
         .chart-placeholder {
             text-align: center;
