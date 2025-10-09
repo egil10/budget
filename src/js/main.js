@@ -723,12 +723,13 @@ function updateNavigationWithDepartments(departments) {
     navList.innerHTML = '';
     navList.appendChild(alleButton);
     
-    // Add department filter buttons
+    // Add department filter buttons with shortened names
     departments.forEach(dept => {
         const navItem = document.createElement('li');
         navItem.className = 'nav-item';
+        const shortName = getShortDepartmentName(dept);
         navItem.innerHTML = `
-            <a href="#" class="nav-link" data-department="${dept}">${dept}</a>
+            <a href="#" class="nav-link" data-department="${dept}" title="${dept}">${shortName}</a>
         `;
         navList.appendChild(navItem);
     });
@@ -755,6 +756,32 @@ function updateNavigationWithDepartments(departments) {
         </button>
     `;
     navList.appendChild(sortItem);
+}
+
+// Get shortened department names for navigation
+function getShortDepartmentName(fullName) {
+    const shortNames = {
+        'Digitaliserings- og forvaltningsdepartementet': 'Digitalisering',
+        'Finansdepartementet': 'Finans',
+        'Forsvarsdepartementet': 'Forsvar',
+        'Helse- og omsorgsdepartementet': 'Helse',
+        'Justis- og beredskapsdepartementet': 'Justis',
+        'Klima- og miljødepartementet': 'Klima',
+        'Kommunal- og distriktsdepartementet': 'Kommunal',
+        'Kultur- og likestillingsdepartementet': 'Kultur',
+        'Kunnskapsdepartementet': 'Utdanning',
+        'Landbruks- og matdepartementet': 'Landbruk',
+        'Nærings- og fiskeridepartementet': 'Næring',
+        'Samferdselsdepartementet': 'Samferdsel',
+        'Utenriksdepartementet': 'Utenriks',
+        'Arbeids- og inkluderingsdepartementet': 'Arbeid',
+        'Barne- og familiedepartementet': 'Barnevern',
+        'Energidepartementet': 'Energi',
+        'Olje- og energidepartementet': 'Olje & Energi',
+        'Ymse': 'Ymse'
+    };
+    
+    return shortNames[fullName] || fullName.substring(0, 12) + '...';
 }
 
 console.log('Budget Dashboard main.js loaded');
