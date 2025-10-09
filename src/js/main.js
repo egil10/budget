@@ -735,13 +735,12 @@ function updateNavigationWithDepartments(departments) {
     `;
     navList.appendChild(alleItem);
     
-    // Add department filter buttons with shortened names
+    // Add department filter buttons with original names (truncated by CSS)
     departments.forEach(dept => {
         const navItem = document.createElement('li');
         navItem.className = 'nav-item';
-        const shortName = getShortDepartmentName(dept);
         navItem.innerHTML = `
-            <a href="#" class="nav-link" data-department="${dept}" title="${dept}">${shortName}</a>
+            <a href="#" class="nav-link" data-department="${dept}" title="${dept}">${dept}</a>
         `;
         navList.appendChild(navItem);
     });
