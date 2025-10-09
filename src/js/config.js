@@ -2,21 +2,21 @@
 
 // Department colors
 export const DEPARTMENT_COLORS = {
-    'Statsministerens kontor': '#E11926',
-    'Arbeids- og inkluderingsdepartementet': '#3b82f6',
-    'Finansdepartementet': '#22c55e',
-    'Forsvarsdepartementet': '#ef4444',
-    'Helse- og omsorgsdepartementet': '#f59e0b',
-    'Justis- og beredskapsdepartementet': '#8b5cf6',
-    'Klima- og miljødepartementet': '#10b981',
-    'Kommunal- og distriktsdepartementet': '#06b6d4',
-    'Kulturdepartementet': '#ec4899',
-    'Kunnskapsdepartementet': '#f97316',
-    'Landbruks- og matdepartementet': '#84cc16',
-    'Nærings- og fiskeridepartementet': '#6366f1',
-    'Olje- og energidepartementet': '#eab308',
-    'Samferdselsdepartementet': '#14b8a6',
-    'Utenriksdepartementet': '#a855f7'
+    'Statsministerens kontor': '#BA0C2F', // deep Norwegian red (flag-inspired)
+    'Arbeids- og inkluderingsdepartementet': '#1E40AF', // work & inclusion – trustworthy navy blue
+    'Finansdepartementet': '#166534', // finance – dark green, stability
+    'Forsvarsdepartementet': '#7F1D1D', // defense – dark red/burgundy, discipline
+    'Helse- og omsorgsdepartementet': '#F59E0B', // health – warm amber, energy
+    'Justis- og beredskapsdepartementet': '#4338CA', // justice – royal blue, authority
+    'Klima- og miljødepartementet': '#15803D', // climate – forest green
+    'Kommunal- og distriktsdepartementet': '#0E7490', // local govt – fjord teal
+    'Kulturdepartementet': '#BE185D', // culture – vibrant magenta, creativity
+    'Kunnskapsdepartementet': '#C2410C', // education – burnt orange, curiosity
+    'Landbruks- og matdepartementet': '#65A30D', // agriculture – earthy green
+    'Nærings- og fiskeridepartementet': '#2563EB', // trade & fisheries – sea blue
+    'Olje- og energidepartementet': '#EAB308', // oil & energy – gold/yellow
+    'Samferdselsdepartementet': '#0891B2', // transport – clean turquoise, motion
+    'Utenriksdepartementet': '#6D28D9' // foreign affairs – royal purple, diplomacy
 };
 
 // Chart configuration
