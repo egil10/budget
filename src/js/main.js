@@ -432,13 +432,15 @@ function groupByDepartmentAndChapter(data) {
 function renderComparisonView(filtered) {
     const grid = document.getElementById('budgetGrid');
     
-    // Group by kap_nr and kap_navn (budget chapters) for better organization
-    const groupedByChapter = {};
+    // Group by individual posts (post_nr + post_navn) for one post per chart
+    const groupedByPost = {};
     
     filtered.forEach(item => {
-        const key = `${item.kap_nr}|||${item.kap_navn}`;
-        if (!groupedByChapter[key]) {
-            groupedByChapter[key] = {
+        const key = `${item.post_nr}|||${item.post_navn}`;
+        if (!groupedByPost[key]) {
+            groupedByPost[key] = {
+                postNr: item.post_nr,
+                postNavn: item.post_navn,
                 kapNr: item.kap_nr,
                 kapNavn: item.kap_navn,
                 gdepNavn: item.gdep_navn,
@@ -448,12 +450,12 @@ function renderComparisonView(filtered) {
                 '2025': []
             };
         }
-        groupedByChapter[key][item.year].push(item);
+        groupedByPost[key][item.year].push(item);
     });
     
     // Group by department for section headers
     const groupedByDepartment = {};
-    Object.values(groupedByChapter).forEach(data => {
+    Object.values(groupedByPost).forEach(data => {
         const deptName = data.gdepNavn;
         if (!groupedByDepartment[deptName]) {
             groupedByDepartment[deptName] = [];
@@ -462,7 +464,7 @@ function renderComparisonView(filtered) {
     });
     
     // Create department sections
-    Object.entries(groupedByDepartment).forEach(([deptName, chapters]) => {
+    Object.entries(groupedByDepartment).forEach(([deptName, posts]) => {
         // Create department header with context
         const section = document.createElement('div');
         section.className = 'department-section';
@@ -478,7 +480,7 @@ function renderComparisonView(filtered) {
         const deptGrid = document.createElement('div');
         deptGrid.className = 'department-grid';
         
-        chapters.forEach(data => {
+        posts.forEach(data => {
             const card = createComparisonCard(data, data['2024'], data['2025']);
             deptGrid.appendChild(card);
         });
@@ -489,7 +491,7 @@ function renderComparisonView(filtered) {
 }
 
 // Create comparison card showing both years
-function createComparisonCard(chapterData, items2024, items2025) {
+function createComparisonCard(postData, items2024, items2025) {
     const card = document.createElement('div');
     card.className = 'budget-card comparison-card';
     
@@ -520,20 +522,16 @@ function createComparisonCard(chapterData, items2024, items2025) {
         changeText = changePercent;
     }
     
-    // Get unique posts for this chapter
-    const allItems = [...items2024, ...items2025];
-    const uniquePosts = [...new Set(allItems.map(item => `${item.post_nr} · ${item.post_navn}`))];
-    
     // Get department color
-    const color = DEPARTMENT_COLORS[chapterData.gdepNavn] || '#3b82f6';
+    const color = DEPARTMENT_COLORS[postData.gdepNavn] || '#3b82f6';
     
     card.innerHTML = `
         <div class="budget-card-header">
-            <h3>Kap. ${chapterData.kapNr} · ${chapterData.kapNavn}</h3>
-            <div class="budget-card-subtitle">${chapterData.gdepNavn}</div>
+            <h3>Post ${postData.postNr} · ${postData.postNavn}</h3>
+            <div class="budget-card-subtitle">Kap. ${postData.kapNr} · ${postData.kapNavn}</div>
         </div>
-        <div class="post-badges">
-            ${uniquePosts.map(post => `<span class="post-badge">Post ${post}</span>`).join('')}
+        <div class="context-line">
+            ${postData.gdepNavn} · ${postData.omrNavn} · ${postData.katNavn}
         </div>
         <div class="year-comparison">
             <div class="year-label">2024</div>
@@ -563,7 +561,7 @@ function createComparisonCard(chapterData, items2024, items2025) {
             canvas.style.height = '50px';
             canvas.style.maxHeight = '50px';
             
-                    createTrendChart(canvas, total2024, total2025, `Kap. ${chapterData.kapNr} · ${chapterData.kapNavn}`);
+                    createTrendChart(canvas, total2024, total2025, `Post ${postData.postNr} · ${postData.postNavn}`);
         }
     }, 100); // Slightly longer delay to ensure DOM is ready
     
