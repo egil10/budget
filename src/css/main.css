@@ -491,7 +491,7 @@ main {
     background: #ffffff;
 }
 
-/* Year Comparison Layout - 2 Column Table, 3 Column for Net Change */
+/* Year Comparison Layout - 2 Column Table */
 .year-comparison {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -499,14 +499,6 @@ main {
     margin-bottom: 0.125rem;
     font-size: 11px;
     font-family: "Times New Roman", Times, serif;
-}
-
-/* Special 3-column layout for net change row */
-.net-change-row {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 0.25rem;
-    align-items: center;
 }
 
 .year-row {
@@ -549,15 +541,6 @@ main {
     letter-spacing: 0.05em;
     font-family: "Times New Roman", Times, serif;
     padding: 0.125rem 0;
-}
-
-.net-change-percentage {
-    font-size: 11px;
-    font-weight: 700;
-    font-family: "Times New Roman", Times, serif;
-    text-align: center;
-    padding: 0.125rem 0;
-    white-space: nowrap;
 }
 
 .net-change-value {
