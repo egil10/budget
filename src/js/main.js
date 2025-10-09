@@ -221,11 +221,11 @@ async function loadBudgetData() {
         // Setup navigation
         setupNavigation();
         
-        // Set default active state to "Alle" - wait for navigation to be created
+        // Set default active state to "Hjem" - wait for navigation to be created
         setTimeout(() => {
-            const alleButton = document.querySelector('.nav-link[data-department="all"]');
-            if (alleButton) {
-                alleButton.classList.add('active');
+            const hjemButton = document.querySelector('.nav-link[data-department="all"]');
+            if (hjemButton) {
+                hjemButton.classList.add('active');
             }
         }, 100);
         
@@ -415,8 +415,13 @@ function renderBudgetData() {
     // Clear grid
     grid.innerHTML = '';
     
-    // Always show comparison view (both years)
-    renderComparisonView(filtered);
+    // If on "Hjem" (all), show department aggregates
+    if (currentFilter === 'all') {
+        renderDepartmentAggregates(filtered);
+    } else {
+        // Show detailed comparison view for specific department
+        renderComparisonView(filtered);
+    }
 }
 
 // Check if item matches search term
@@ -449,6 +454,136 @@ function groupByDepartmentAndChapter(data) {
     });
     
     return grouped;
+}
+
+// Render department aggregates for "Hjem" view
+function renderDepartmentAggregates(filtered) {
+    const grid = document.getElementById('budgetGrid');
+    
+    // Group by fdep_navn
+    const groupedByFdep = {};
+    
+    filtered.forEach(item => {
+        const fdepName = item.fdep_navn?.trim() || 'Ukjent';
+        if (!groupedByFdep[fdepName]) {
+            groupedByFdep[fdepName] = {
+                name: fdepName,
+                '2024': [],
+                '2025': []
+            };
+        }
+        groupedByFdep[fdepName][item.year].push(item);
+    });
+    
+    // Convert to array and sort alphabetically
+    const departments = Object.values(groupedByFdep).sort((a, b) => 
+        a.name.localeCompare(b.name)
+    );
+    
+    console.log(`Rendering ${departments.length} department aggregates`);
+    
+    // Create a grid container for department cards
+    const deptGrid = document.createElement('div');
+    deptGrid.className = 'department-grid';
+    deptGrid.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    `;
+    
+    // Create card for each department
+    departments.forEach(dept => {
+        const card = createDepartmentAggregateCard(dept);
+        deptGrid.appendChild(card);
+    });
+    
+    grid.appendChild(deptGrid);
+}
+
+// Create aggregate card for department
+function createDepartmentAggregateCard(deptData) {
+    const card = document.createElement('div');
+    card.className = 'budget-card comparison-card';
+    card.style.cursor = 'pointer';
+    
+    // Calculate totals
+    const total2024 = deptData['2024'].reduce((sum, item) => {
+        const amount = parseFloat(item['beløp'] || item['belop'] || 0);
+        return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+    
+    const total2025 = deptData['2025'].reduce((sum, item) => {
+        const amount = parseFloat(item['beløp'] || item['belop'] || 0);
+        return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+    
+    const change = total2025 - total2024;
+    let changePercent = '0%';
+    
+    if (total2024 === 0 && total2025 > 0) {
+        changePercent = '∞';
+    } else if (total2024 > 0) {
+        const percent = ((change / total2024) * 100);
+        changePercent = percent.toFixed(1) + '%';
+    }
+    
+    // Get department abbreviation
+    const abbreviation = getDepartmentAbbreviation(deptData.name);
+    
+    card.innerHTML = `
+        <div class="budget-card-header">
+            <h3>${deptData.name}</h3>
+            <div class="budget-card-subtitle">${abbreviation}</div>
+        </div>
+        <div class="year-comparison">
+            <div class="year-label">2024</div>
+            <div class="year-amount">${formatAmount(total2024)}</div>
+            <div class="year-label">2025</div>
+            <div class="year-amount">${formatAmount(total2025)}</div>
+            <div class="net-change-label">NET CHANGE</div>
+            <div class="net-change-value" style="color: ${change >= 0 ? '#00aa00' : '#aa0000'};">
+                (${change >= 0 ? '+' : ''}${changePercent}) ${formatAmount(Math.abs(change))}
+            </div>
+        </div>
+        <div class="chart-wrapper" style="margin-top: 0.125rem; height: 100px; position: relative; overflow: hidden;">
+            <canvas class="trend-chart" style="width: 100%; height: 100%; max-height: 100px;"></canvas>
+        </div>
+    `;
+    
+    // Add click handler to drill into department
+    card.addEventListener('click', () => {
+        // Set filter to this department
+        currentFilter = deptData.name;
+        
+        // Update active nav item
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('data-department') === deptData.name) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+        
+        // Re-render with filtered data
+        renderBudgetData();
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    // Add chart after card is in DOM
+    setTimeout(() => {
+        const canvas = card.querySelector('.trend-chart');
+        if (canvas && typeof Chart !== 'undefined') {
+            canvas.style.width = '100%';
+            canvas.style.height = '100px';
+            canvas.style.maxHeight = '100px';
+            createTrendChart(canvas, total2024, total2025, deptData.name);
+        }
+    }, 100);
+    
+    return card;
 }
 
 // Render comparison view (both years)
@@ -607,20 +742,38 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
         canvas.chart.destroy();
     }
     
+    // Calculate min/max for y-axis scaling
+    const minAmount = Math.min(amount2024, amount2025);
+    const maxAmount = Math.max(amount2024, amount2025);
+    const range = maxAmount - minAmount;
+    const padding = range * 0.1; // 10% padding
+    
+    const yMin = Math.max(0, minAmount - padding);
+    const yMax = maxAmount + padding;
+    
+    // Format y-axis labels
+    function formatYLabel(value) {
+        if (value >= 1000000000) {
+            return (value / 1000000000).toFixed(1) + 'B';
+        } else if (value >= 1000000) {
+            return (value / 1000000).toFixed(0) + 'M';
+        } else if (value >= 1000) {
+            return (value / 1000).toFixed(0) + 'K';
+        }
+        return value.toString();
+    }
+    
     const chart = new Chart(ctx, {
-        type: 'line',
+        type: 'bar', // Changed to bar chart for better comparison
         data: {
             labels: ['2024', '2025'],
             datasets: [{
                 label: label,
                 data: [amount2024, amount2025],
+                backgroundColor: amount2025 >= amount2024 ? '#00aa00' : '#aa0000',
                 borderColor: amount2025 >= amount2024 ? '#00aa00' : '#aa0000',
-                backgroundColor: amount2025 >= amount2024 ? 'rgba(0, 170, 0, 0.1)' : 'rgba(170, 0, 0, 0.1)',
-                borderWidth: 3,
-                tension: 0.1,
-                fill: true,
-                pointRadius: 0,
-                pointHoverRadius: 0
+                borderWidth: 1,
+                borderRadius: 2
             }]
         },
         options: {
@@ -642,26 +795,46 @@ function createTrendChart(canvas, amount2024, amount2025, label) {
             scales: {
                 y: {
                     beginAtZero: false,
-                    display: false,
+                    min: yMin,
+                    max: yMax,
+                    display: true,
                     grid: {
-                        display: false
+                        display: true,
+                        color: '#e5e5e5',
+                        lineWidth: 0.5
+                    },
+                    ticks: {
+                        display: true,
+                        maxTicksLimit: 3,
+                        color: '#666666',
+                        font: {
+                            size: 8,
+                            family: '"Times New Roman", Times, serif'
+                        },
+                        callback: function(value) {
+                            return formatYLabel(value);
+                        }
                     }
                 },
                 x: {
-                    display: false,
+                    display: true,
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                        display: true,
+                        color: '#666666',
+                        font: {
+                            size: 9,
+                            family: '"Times New Roman", Times, serif',
+                            weight: 'bold'
+                        }
                     }
                 }
             },
             elements: {
-                point: {
-                    radius: 0,
-                    hoverRadius: 0
-                },
-                line: {
-                    tension: 0.1,
-                    borderWidth: 3
+                bar: {
+                    borderWidth: 1
                 }
             }
         }
@@ -756,13 +929,13 @@ function updateNavigationWithDepartments(departments) {
     // Clear all existing nav items
     navList.innerHTML = '';
     
-    // Add "Alle" button first
-    const alleItem = document.createElement('li');
-    alleItem.className = 'nav-item';
-    alleItem.innerHTML = `
-        <a href="#" class="nav-link" data-department="all">Alle</a>
+    // Add "Hjem" button first
+    const hjemItem = document.createElement('li');
+    hjemItem.className = 'nav-item';
+    hjemItem.innerHTML = `
+        <a href="#" class="nav-link" data-department="all">Hjem</a>
     `;
-    navList.appendChild(alleItem);
+    navList.appendChild(hjemItem);
     
     // Add department filter buttons with official abbreviations
     departments.forEach(dept => {

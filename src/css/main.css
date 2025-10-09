@@ -491,6 +491,17 @@ main {
     background: #ffffff;
 }
 
+/* Clickable department cards on home page */
+.budget-card[style*="cursor: pointer"]:hover {
+    background: #f9f9f9;
+    border-color: #000000;
+    border-width: 1px;
+}
+
+.budget-card[style*="cursor: pointer"]:active {
+    background: #f0f0f0;
+}
+
 /* Year Comparison Layout - 2 Column Table */
 .year-comparison {
     display: grid;
