@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="./src/assets/favicon.ico">
     <link rel="stylesheet" href="./src/css/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
     <div id="loading-screen">
@@ -20,31 +21,68 @@
         <!-- Header -->
         <header class="main-header">
             <div class="header-container">
-                <h1 class="site-title">Statsbudsjettet</h1>
-                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                    </svg>
-                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="4"></circle>
-                        <path d="M12 2v2"></path>
-                        <path d="M12 20v2"></path>
-                        <path d="M4.93 4.93l1.41 1.41"></path>
-                        <path d="M17.66 17.66l1.41 1.41"></path>
-                        <path d="M2 12h2"></path>
-                        <path d="M20 12h2"></path>
-                        <path d="M4.93 19.07l1.41-1.41"></path>
-                        <path d="M17.66 6.34l1.41-1.41"></path>
-                    </svg>
-                </button>
+                <h1 class="site-title" onclick="window.location.reload()">Statsbudsjettet</h1>
+                <div class="header-actions">
+                    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                        <i data-lucide="moon" class="moon-icon"></i>
+                        <i data-lucide="sun" class="sun-icon"></i>
+                    </button>
+                </div>
             </div>
         </header>
+
+        <!-- Navigation Menu -->
+        <nav class="nav-menu" id="nav-menu">
+            <div class="nav-menu-wrapper">
+                <div class="nav-menu-header">
+                    <h2>Departementer</h2>
+                    <button class="nav-close" id="nav-close">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="nav-menu-items" id="nav-menu-items">
+                    <!-- Department menu items will be dynamically generated here -->
+                </div>
+                <div class="nav-menu-footer">
+                    <div class="nav-quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Totalt budsjett 2026</span>
+                            <span class="stat-value" id="total-budget-2026">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Antall departementer</span>
+                            <span class="stat-value" id="department-count">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
         <!-- Main Content -->
         <main class="main-content">
             <div class="container">
-                <div class="departments-grid" id="departments-grid">
-                    <!-- Department charts will be dynamically generated here -->
+                <!-- Overview view -->
+                <div class="overview-view" id="overview-view">
+                    <div class="departments-grid" id="departments-grid">
+                        <!-- Department charts will be dynamically generated here -->
+                    </div>
+                </div>
+                
+                <!-- Drill-down view -->
+                <div class="drill-down-view" id="drill-down-view">
+                    <div class="drill-down-header">
+                        <button class="back-button" id="back-button">
+                            <i data-lucide="arrow-left"></i>
+                            Tilbake
+                        </button>
+                        <h1 class="drill-down-title" id="drill-down-title">Departement Detaljer</h1>
+                    </div>
+                    <div class="budget-posts-grid" id="budget-posts-grid">
+                        <!-- Budget posts will be dynamically generated here -->
+                    </div>
                 </div>
             </div>
         </main>

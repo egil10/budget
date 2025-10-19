@@ -53,13 +53,22 @@ const loadingScreen = document.getElementById('loading-screen');
 const app = document.getElementById('app');
 const departmentsGrid = document.getElementById('departments-grid');
 const themeToggle = document.getElementById('theme-toggle');
+const navToggle = document.getElementById('nav-toggle');
+const navMenu = document.getElementById('nav-menu');
+const navClose = document.getElementById('nav-close');
+const navMenuItems = document.getElementById('nav-menu-items');
+const totalBudget2026 = document.getElementById('total-budget-2026');
+const departmentCount = document.getElementById('department-count');
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM loaded, initializing...');
     await loadBudgetData();
     initThemeToggle();
+    initLucideIcons();
+    initNavigation();
     renderDepartmentCharts();
+    initDrillDown();
     hideLoadingScreen();
 });
 
@@ -153,6 +162,96 @@ function hideLoadingScreen() {
     app.style.display = 'block';
 }
 
+// Initialize Lucide icons
+function initLucideIcons() {
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// Initialize navigation
+function initNavigation() {
+    // Toggle navigation menu
+    navToggle.addEventListener('click', () => {
+        navMenu.classList.add('active');
+    });
+    
+    navClose.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!navMenu.contains(e.target) && !navToggle.contains(e.target)) {
+            navMenu.classList.remove('active');
+        }
+    });
+    
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            navMenu.classList.remove('active');
+        }
+    });
+    
+    // Render navigation menu items
+    renderNavigationMenu();
+    
+    // Update quick stats
+    updateQuickStats();
+}
+
+function renderNavigationMenu() {
+    const departments = getUniqueDepartments();
+    const departmentStats = getDepartmentStats();
+    
+    navMenuItems.innerHTML = '';
+    
+    departments.forEach(deptName => {
+        const deptStat = departmentStats.find(d => d.name === deptName);
+        const total2026 = deptStat ? deptStat.total2026 : 0;
+        
+        const menuItem = document.createElement('a');
+        menuItem.className = 'nav-menu-item';
+        menuItem.href = '#';
+        menuItem.dataset.department = deptName;
+        
+        menuItem.innerHTML = `
+            <div class="nav-menu-item-icon">
+                <i data-lucide="building"></i>
+            </div>
+            <div class="nav-menu-item-content">
+                <div class="nav-menu-item-title">${deptName}</div>
+                <div class="nav-menu-item-subtitle">${formatAmount(total2026)}</div>
+            </div>
+        `;
+        
+        menuItem.addEventListener('click', (e) => {
+            e.preventDefault();
+            showDrillDown(deptName);
+            navMenu.classList.remove('active');
+        });
+        
+        navMenuItems.appendChild(menuItem);
+    });
+    
+    // Re-initialize Lucide icons for new content
+    initLucideIcons();
+}
+
+function updateQuickStats() {
+    const departmentStats = getDepartmentStats();
+    const total2026 = departmentStats.reduce((sum, dept) => sum + dept.total2026, 0);
+    
+    if (totalBudget2026) {
+        totalBudget2026.textContent = formatAmount(total2026);
+    }
+    
+    if (departmentCount) {
+        departmentCount.textContent = departmentStats.length;
+    }
+}
+
 // Theme toggle functionality
 function initThemeToggle() {
     const savedTheme = localStorage.getItem('theme');
@@ -163,11 +262,13 @@ function initThemeToggle() {
     }
 
     if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        // Re-initialize Lucide icons after theme change
+        setTimeout(() => initLucideIcons(), 100);
         });
     }
 }
@@ -250,11 +351,16 @@ function createDepartmentChartBlock(dept) {
     const block = document.createElement('div');
     block.className = 'department-chart-block';
     block.setAttribute('data-department', dept.name);
+    
+    // Add click event to show drill-down
+    block.addEventListener('click', () => {
+        showDrillDown(dept.name);
+    });
 
     block.innerHTML = `
         <div class="department-header">
             <h2 class="department-title">${dept.name}</h2>
-            <p class="department-subtitle">Budsjett i millioner NOK</p>
+            <p class="department-subtitle">Budsjett</p>
         </div>
         <div class="department-chart">
             <div class="chart-container" id="chart-${dept.name.replace(/\s+/g, '-')}"></div>
@@ -426,6 +532,185 @@ function createChart(container, dept) {
     }
 
     container.innerHTML = '';
+    container.appendChild(svg);
+}
+
+// Drill-down functionality
+function initDrillDown() {
+    const backButton = document.getElementById('back-button');
+    const overviewView = document.getElementById('overview-view');
+    const drillDownView = document.getElementById('drill-down-view');
+    
+    backButton.addEventListener('click', () => {
+        showOverview();
+    });
+}
+
+function showDrillDown(departmentName) {
+    const overviewView = document.getElementById('overview-view');
+    const drillDownView = document.getElementById('drill-down-view');
+    const drillDownTitle = document.getElementById('drill-down-title');
+    const budgetPostsGrid = document.getElementById('budget-posts-grid');
+    
+    // Hide overview, show drill-down
+    overviewView.style.display = 'none';
+    drillDownView.classList.add('active');
+    
+    // Update title
+    drillDownTitle.textContent = departmentName;
+    
+    // Get department data
+    const deptItems = budgetData.combined.filter(item => 
+        item.fdep_navn && item.fdep_navn.trim() === departmentName
+    );
+    
+    // Group by budget post (kap_nr + post_nr)
+    const groupedPosts = {};
+    deptItems.forEach(item => {
+        const postKey = `${item.kap_nr}.${item.post_nr} - ${item.post_navn}`;
+        if (!groupedPosts[postKey]) {
+            groupedPosts[postKey] = {
+                kap_nr: item.kap_nr,
+                post_nr: item.post_nr,
+                post_navn: item.post_navn,
+                kap_navn: item.kap_navn,
+                items: []
+            };
+        }
+        groupedPosts[postKey].items.push(item);
+    });
+    
+    // Render budget posts
+    budgetPostsGrid.innerHTML = '';
+    
+    Object.values(groupedPosts).forEach(post => {
+        const postElement = createBudgetPostElement(post);
+        budgetPostsGrid.appendChild(postElement);
+    });
+    
+    // Re-initialize Lucide icons for new content
+    initLucideIcons();
+}
+
+function showOverview() {
+    const overviewView = document.getElementById('overview-view');
+    const drillDownView = document.getElementById('drill-down-view');
+    
+    drillDownView.classList.remove('active');
+    overviewView.style.display = 'block';
+}
+
+function createBudgetPostElement(post) {
+    const postElement = document.createElement('div');
+    postElement.className = 'budget-post-item';
+    
+    // Calculate totals for each year
+    const totals = {};
+    ['2024', '2025', '2026'].forEach(year => {
+        totals[year] = post.items
+            .filter(item => item.year === parseInt(year))
+            .reduce((sum, item) => sum + (item.beløp || 0), 0);
+    });
+    
+    const total2024 = totals['2024'] || 0;
+    const total2025 = totals['2025'] || 0;
+    const total2026 = totals['2026'] || 0;
+    
+    const change24to26 = total2026 - total2024;
+    const changePercent = total2024 !== 0 ? ((change24to26 / total2024) * 100).toFixed(1) : '0.0';
+    
+    postElement.innerHTML = `
+        <div class="post-header">
+            <h3 class="post-title">${post.kap_navn}</h3>
+            <span class="post-amount">${formatAmount(total2026)}</span>
+        </div>
+        <div class="post-details">
+            <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
+            <p><strong>Endring 2024-2026:</strong> 
+                <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">
+                    ${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)
+                </span>
+            </p>
+        </div>
+        <div class="post-chart" id="post-chart-${post.kap_nr}-${post.post_nr}"></div>
+    `;
+    
+    // Create mini chart for this post
+    const chartContainer = postElement.querySelector(`#post-chart-${post.kap_nr}-${post.post_nr}`);
+    createMiniChart(chartContainer, total2024, total2025, total2026, post.post_navn);
+    
+    return postElement;
+}
+
+function createMiniChart(container, amount2024, amount2025, amount2026, label) {
+    const width = 300;
+    const height = 150;
+    const margin = { top: 10, right: 20, bottom: 30, left: 40 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const years = ['2024', '2025', '2026'];
+    const amounts = [amount2024, amount2025, amount2026].map(amount => 
+        isNaN(amount) || amount === null || amount === undefined ? 0 : amount
+    );
+
+    const validAmounts = amounts.filter(amount => !isNaN(amount) && isFinite(amount));
+    if (validAmounts.length === 0) return;
+
+    const minAmount = Math.min(...validAmounts);
+    const maxAmount = Math.max(...validAmounts);
+    const range = maxAmount - minAmount;
+    const paddedMin = range > 0 ? minAmount - range * 0.1 : minAmount * 0.9;
+    const paddedMax = range > 0 ? maxAmount + range * 0.1 : maxAmount * 1.1;
+
+    const xScale = (index) => margin.left + (innerWidth / (years.length - 1)) * index;
+    const yScale = (amount) => {
+        const safeAmount = isNaN(amount) || amount === null || amount === undefined ? 0 : amount;
+        const range = paddedMax - paddedMin;
+        if (range === 0) return margin.top + innerHeight / 2;
+        return margin.top + innerHeight - ((safeAmount - paddedMin) / range) * innerHeight;
+    };
+
+    // Create SVG
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.classList.add('chart-svg');
+
+    // Create line path
+    const linePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    let lineD = `M ${xScale(0)} ${yScale(amounts[0])}`;
+    for (let i = 1; i < years.length; i++) {
+        lineD += ` L ${xScale(i)} ${yScale(amounts[i])}`;
+    }
+    linePath.setAttribute('d', lineD);
+    linePath.classList.add('chart-line');
+    linePath.style.stroke = '#0083ff';
+    svg.appendChild(linePath);
+
+    // Create data points
+    years.forEach((year, index) => {
+        const point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        point.setAttribute('cx', xScale(index));
+        point.setAttribute('cy', yScale(amounts[index]));
+        point.classList.add('chart-point');
+        point.style.fill = '#0083ff';
+        point.style.stroke = 'var(--bg-primary)';
+        point.style.strokeWidth = '2';
+        point.setAttribute('r', '3');
+        svg.appendChild(point);
+    });
+
+    // Create x-axis labels
+    years.forEach((year, index) => {
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', xScale(index));
+        label.setAttribute('y', height - 5);
+        label.classList.add('chart-label');
+        label.textContent = year;
+        svg.appendChild(label);
+    });
+
     container.appendChild(svg);
 }
 
