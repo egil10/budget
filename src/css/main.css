@@ -163,6 +163,7 @@ body {
     color: var(--text-primary);
 }
 
+.drill-up-button,
 .nav-toggle,
 .theme-toggle {
     background: var(--bg-secondary);
@@ -177,6 +178,7 @@ body {
     color: var(--text-secondary);
 }
 
+.drill-up-button:hover,
 .nav-toggle:hover,
 .theme-toggle:hover {
     background: var(--bg-tertiary);
@@ -589,9 +591,9 @@ body {
 }
 
 .post-amount-secondary {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-primary);
 }
 
 .post-details {
@@ -611,6 +613,17 @@ body {
     background: var(--bg-primary);
     border-radius: var(--radius-sm);
     border-left: 3px solid var(--accent-primary);
+}
+
+.year-breakdown {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-secondary);
+    margin-top: 1rem;
+}
+
+.year-breakdown .post-title {
+    font-size: 1rem;
+    color: var(--text-secondary);
 }
 
 .detail-row {
