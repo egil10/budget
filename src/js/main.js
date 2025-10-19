@@ -48,6 +48,9 @@ let budgetData = {
     combined: []
 };
 
+// Navigation state
+let navigationPath = ['Statsbudsjettet'];
+
 // DOM Elements
 const loadingScreen = document.getElementById('loading-screen');
 const app = document.getElementById('app');
@@ -59,6 +62,7 @@ const navClose = document.getElementById('nav-close');
 const navMenuItems = document.getElementById('nav-menu-items');
 const totalBudget2026 = document.getElementById('total-budget-2026');
 const departmentCount = document.getElementById('department-count');
+const siteTitle = document.getElementById('site-title');
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', async () => {
@@ -67,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initThemeToggle();
     initLucideIcons();
     initNavigation();
+    initSiteTitle();
     renderDepartmentCharts();
     initDrillDown();
     hideLoadingScreen();
@@ -166,6 +171,38 @@ function hideLoadingScreen() {
 function initLucideIcons() {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+    }
+}
+
+// Update header title with breadcrumbs
+function updateHeaderTitle() {
+    if (siteTitle && navigationPath.length > 1) {
+        let breadcrumbHTML = '';
+        navigationPath.forEach((item, index) => {
+            if (index === 0) {
+                breadcrumbHTML += `<span class="breadcrumb-item">${item}</span>`;
+            } else {
+                breadcrumbHTML += `<span class="breadcrumb-separator">→</span><span class="breadcrumb-item">${item}</span>`;
+            }
+        });
+        siteTitle.innerHTML = breadcrumbHTML;
+    } else if (siteTitle) {
+        siteTitle.innerHTML = 'Statsbudsjettet';
+    }
+}
+
+// Initialize site title click handler
+function initSiteTitle() {
+    if (siteTitle) {
+        siteTitle.addEventListener('click', () => {
+            if (navigationPath.length > 1) {
+                // If in drill-down, go back to main view
+                showOverview();
+            } else {
+                // If already at main view, refresh the page
+                window.location.reload();
+            }
+        });
     }
 }
 
@@ -351,11 +388,6 @@ function createDepartmentChartBlock(dept) {
     const block = document.createElement('div');
     block.className = 'department-chart-block';
     block.setAttribute('data-department', dept.name);
-    
-    // Add click event to show drill-down
-    block.addEventListener('click', () => {
-        showDrillDown(dept.name);
-    });
 
     block.innerHTML = `
         <div class="department-header">
@@ -366,6 +398,12 @@ function createDepartmentChartBlock(dept) {
             <div class="chart-container" id="chart-${dept.name.replace(/\s+/g, '-')}"></div>
         </div>
     `;
+    
+    // Add click event to title for drill-down
+    const titleElement = block.querySelector('.department-title');
+    titleElement.addEventListener('click', () => {
+        showDrillDown(dept.name);
+    });
     
     // Create the chart
     const chartContainer = block.querySelector('.chart-container');
@@ -552,6 +590,10 @@ function showDrillDown(departmentName) {
     const drillDownTitle = document.getElementById('drill-down-title');
     const budgetPostsGrid = document.getElementById('budget-posts-grid');
     
+    // Update navigation path
+    navigationPath = ['Statsbudsjettet', departmentName];
+    updateHeaderTitle();
+    
     // Hide overview, show drill-down
     overviewView.style.display = 'none';
     drillDownView.classList.add('active');
@@ -596,8 +638,90 @@ function showOverview() {
     const overviewView = document.getElementById('overview-view');
     const drillDownView = document.getElementById('drill-down-view');
     
+    // Reset navigation path
+    navigationPath = ['Statsbudsjettet'];
+    updateHeaderTitle();
+    
     drillDownView.classList.remove('active');
     overviewView.style.display = 'block';
+}
+
+function showBudgetPostDetails(post) {
+    const overviewView = document.getElementById('overview-view');
+    const drillDownView = document.getElementById('drill-down-view');
+    const drillDownTitle = document.getElementById('drill-down-title');
+    const budgetPostsGrid = document.getElementById('budget-posts-grid');
+    
+    // Update navigation path to include the budget post
+    navigationPath = ['Statsbudsjettet', navigationPath[1] || 'Departement', post.kap_navn];
+    updateHeaderTitle();
+    
+    // Hide overview, show drill-down
+    overviewView.style.display = 'none';
+    drillDownView.classList.add('active');
+    
+    // Update title
+    drillDownTitle.textContent = `${post.kap_navn} - Detaljer`;
+    
+    // Show individual budget items within this post
+    budgetPostsGrid.innerHTML = '';
+    
+    // Group items by year and show detailed breakdown
+    const itemsByYear = {};
+    post.items.forEach(item => {
+        if (!itemsByYear[item.year]) {
+            itemsByYear[item.year] = [];
+        }
+        itemsByYear[item.year].push(item);
+    });
+    
+    // Create detailed breakdown
+    Object.keys(itemsByYear).sort().forEach(year => {
+        const yearItems = itemsByYear[year];
+        
+        const yearElement = document.createElement('div');
+        yearElement.className = 'budget-post-item';
+        
+        const yearTotal = yearItems.reduce((sum, item) => sum + (item.beløp || 0), 0);
+        
+        yearElement.innerHTML = `
+            <div class="post-header">
+                <h3 class="post-title">${year} - ${post.kap_navn}</h3>
+                <span class="post-amount">${formatAmount(yearTotal)}</span>
+        </div>
+            <div class="post-details">
+                <p><strong>Antall poster:</strong> ${yearItems.length}</p>
+                <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
+        </div>
+        `;
+        
+        // Add individual items
+        yearItems.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'budget-item-detail';
+            itemElement.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">${item.stikkord || 'Ingen stikkord'}</span>
+                    <span class="detail-amount">${formatAmount(item.beløp)}</span>
+        </div>
+    `;
+            yearElement.appendChild(itemElement);
+        });
+        
+        budgetPostsGrid.appendChild(yearElement);
+    });
+    
+    // Add back button functionality
+    const backButton = document.getElementById('back-button');
+    backButton.onclick = () => {
+        // Go back to department view
+        const departmentName = navigationPath[1];
+        if (departmentName) {
+            showDrillDown(departmentName);
+        } else {
+            showOverview();
+        }
+    };
 }
 
 function createBudgetPostElement(post) {
@@ -621,8 +745,12 @@ function createBudgetPostElement(post) {
     
     postElement.innerHTML = `
         <div class="post-header">
-            <h3 class="post-title">${post.kap_navn}</h3>
-            <span class="post-amount">${formatAmount(total2026)}</span>
+            <h3 class="post-title clickable-title">${post.kap_navn}</h3>
+            <div class="post-amounts">
+                <span class="post-amount">2026: ${formatAmount(total2026)}</span>
+                <span class="post-amount-secondary">2025: ${formatAmount(total2025)}</span>
+                <span class="post-amount-secondary">2024: ${formatAmount(total2024)}</span>
+            </div>
         </div>
         <div class="post-details">
             <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
@@ -635,6 +763,12 @@ function createBudgetPostElement(post) {
         <div class="post-chart" id="post-chart-${post.kap_nr}-${post.post_nr}"></div>
     `;
     
+    // Add click event to title for deeper drill-down
+    const titleElement = postElement.querySelector('.post-title');
+    titleElement.addEventListener('click', () => {
+        showBudgetPostDetails(post);
+    });
+    
     // Create mini chart for this post
     const chartContainer = postElement.querySelector(`#post-chart-${post.kap_nr}-${post.post_nr}`);
     createMiniChart(chartContainer, total2024, total2025, total2026, post.post_navn);
@@ -643,9 +777,9 @@ function createBudgetPostElement(post) {
 }
 
 function createMiniChart(container, amount2024, amount2025, amount2026, label) {
-    const width = 300;
-    const height = 150;
-    const margin = { top: 10, right: 20, bottom: 30, left: 40 };
+    const width = 350;
+    const height = 180;
+    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -677,7 +811,83 @@ function createMiniChart(container, amount2024, amount2025, amount2026, label) {
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.classList.add('chart-svg');
 
-    // Create line path
+    // Define gradient
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const linearGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    linearGradient.setAttribute('id', `miniChartGradient-${Math.random().toString(36).substr(2, 9)}`);
+    linearGradient.setAttribute('x1', '0%');
+    linearGradient.setAttribute('y1', '0%');
+    linearGradient.setAttribute('x2', '0%');
+    linearGradient.setAttribute('y2', '100%');
+
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0.4');
+    stop1.setAttribute('stop-color', '#0083ff');
+    stop1.setAttribute('stop-opacity', '1');
+    linearGradient.appendChild(stop1);
+
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '0.8');
+    stop2.setAttribute('stop-color', '#0083ff');
+    stop2.setAttribute('stop-opacity', '0');
+    linearGradient.appendChild(stop2);
+
+    defs.appendChild(linearGradient);
+    svg.appendChild(defs);
+
+    // Y-axis grid lines and labels
+    const numTicks = 3;
+    for (let i = 0; i <= numTicks; i++) {
+        const y = margin.top + (innerHeight / numTicks) * i;
+        const value = paddedMax - ((paddedMax - paddedMin) / numTicks) * i;
+
+        const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        gridLine.setAttribute('x1', margin.left);
+        gridLine.setAttribute('y1', y);
+        gridLine.setAttribute('x2', width - margin.right);
+        gridLine.setAttribute('y2', y);
+        gridLine.classList.add('chart-grid-line');
+        gridLine.style.stroke = 'var(--border-primary)';
+        gridLine.style.strokeDasharray = '2 2';
+        svg.appendChild(gridLine);
+
+        const textLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        textLabel.setAttribute('x', margin.left - 5);
+        textLabel.setAttribute('y', y + 4);
+        textLabel.classList.add('chart-label-y');
+        textLabel.style.fontSize = '10px';
+        textLabel.style.fill = 'var(--text-secondary)';
+        textLabel.textContent = formatAmount(value);
+        svg.appendChild(textLabel);
+    }
+
+    // X and Y axis lines
+    const xAxisLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    xAxisLine.setAttribute('x1', margin.left);
+    xAxisLine.setAttribute('y1', margin.top + innerHeight);
+    xAxisLine.setAttribute('x2', width - margin.right);
+    xAxisLine.setAttribute('y2', margin.top + innerHeight);
+    xAxisLine.classList.add('chart-axis-line');
+    xAxisLine.style.stroke = 'var(--text-primary)';
+    svg.appendChild(xAxisLine);
+
+    const yAxisLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    yAxisLine.setAttribute('x1', margin.left);
+    yAxisLine.setAttribute('y1', margin.top);
+    yAxisLine.setAttribute('x2', margin.left);
+    yAxisLine.setAttribute('y2', margin.top + innerHeight);
+    yAxisLine.classList.add('chart-axis-line');
+    yAxisLine.style.stroke = 'var(--text-primary)';
+    svg.appendChild(yAxisLine);
+
+    // Area path
+    const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const areaPoints = amounts.map((amount, i) => `${xScale(i)} ${yScale(amount)}`).join(' L ');
+    areaPath.setAttribute('d', `M ${xScale(0)} ${margin.top + innerHeight} L ${areaPoints} L ${xScale(years.length - 1)} ${margin.top + innerHeight} Z`);
+    areaPath.style.fill = `url(#${linearGradient.getAttribute('id')})`;
+    svg.appendChild(areaPath);
+
+    // Line path
     const linePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     let lineD = `M ${xScale(0)} ${yScale(amounts[0])}`;
     for (let i = 1; i < years.length; i++) {
@@ -686,6 +896,7 @@ function createMiniChart(container, amount2024, amount2025, amount2026, label) {
     linePath.setAttribute('d', lineD);
     linePath.classList.add('chart-line');
     linePath.style.stroke = '#0083ff';
+    linePath.style.strokeWidth = '2';
     svg.appendChild(linePath);
 
     // Create data points
@@ -699,16 +910,16 @@ function createMiniChart(container, amount2024, amount2025, amount2026, label) {
         point.style.strokeWidth = '2';
         point.setAttribute('r', '3');
         svg.appendChild(point);
-    });
 
-    // Create x-axis labels
-    years.forEach((year, index) => {
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', xScale(index));
-        label.setAttribute('y', height - 5);
-        label.classList.add('chart-label');
-        label.textContent = year;
-        svg.appendChild(label);
+        // Year labels (just the year, no values)
+        const yearLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        yearLabel.setAttribute('x', xScale(index));
+        yearLabel.setAttribute('y', height - 10);
+        yearLabel.classList.add('chart-label');
+        yearLabel.style.fontSize = '11px';
+        yearLabel.style.fill = 'var(--text-primary)';
+        yearLabel.textContent = year;
+        svg.appendChild(yearLabel);
     });
 
     container.appendChild(svg);
