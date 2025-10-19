@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDrillUp();
     renderDepartmentCharts();
     initDrillDown();
+    initResponsiveHandlers();
     hideLoadingScreen();
 });
 
@@ -225,6 +226,20 @@ function initDrillUp() {
             drillUpOneLevel();
         });
     }
+}
+
+// Initialize responsive handlers
+function initResponsiveHandlers() {
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            // Re-render charts when window is resized
+            if (budgetData.combined.length > 0) {
+                renderDepartmentCharts();
+            }
+        }, 250);
+    });
 }
 
 // Drill up one level
@@ -459,8 +474,21 @@ function createDepartmentChartBlock(dept) {
 
 // Create chart
 function createChart(container, dept) {
-    const width = 900;
-    const height = 350;
+    // Responsive sizing based on screen width
+    const isMobile = window.innerWidth <= 768;
+    const isSmallMobile = window.innerWidth <= 480;
+    
+    let width, height;
+    if (isSmallMobile) {
+        width = 280;
+        height = 200;
+    } else if (isMobile) {
+        width = 400;
+        height = 250;
+            } else {
+        width = 900;
+        height = 350;
+    }
     const margin = { top: 20, right: 40, bottom: 40, left: 60 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -766,7 +794,7 @@ function createIndividualBudgetPostElement(post) {
                 <span class="post-amount">2026: ${formatAmount(total2026)}</span>
                 <span class="post-amount-secondary">2025: ${formatAmount(total2025)}</span>
                 <span class="post-amount-secondary">2024: ${formatAmount(total2024)}</span>
-            </div>
+        </div>
         </div>
         <div class="post-details">
             <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
@@ -775,7 +803,7 @@ function createIndividualBudgetPostElement(post) {
                     ${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)
                 </span>
             </p>
-        </div>
+            </div>
         <div class="post-chart" id="post-chart-${post.kap_nr}-${post.post_nr}"></div>
     `;
     
@@ -843,7 +871,7 @@ function showBudgetPostDetails(post) {
                 <span class="post-amount">2026: ${formatAmount(yearTotals['2026'])}</span>
                 <span class="post-amount-secondary">2025: ${formatAmount(yearTotals['2025'])}</span>
                 <span class="post-amount-secondary">2024: ${formatAmount(yearTotals['2024'])}</span>
-            </div>
+        </div>
         </div>
         <div class="post-details">
             <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
@@ -852,7 +880,7 @@ function showBudgetPostDetails(post) {
                     ${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)
                 </span>
             </p>
-        </div>
+            </div>
         <div class="post-chart" id="post-chart-${post.kap_nr}-${post.post_nr}"></div>
     `;
     
@@ -875,12 +903,12 @@ function showBudgetPostDetails(post) {
             <div class="post-header">
                 <h3 class="post-title">${year} - Detaljer</h3>
                 <span class="post-amount">${formatAmount(yearTotal)}</span>
-            </div>
+                </div>
             <div class="post-details">
                 <p><strong>Antall poster:</strong> ${yearItems.length}</p>
-            </div>
-        `;
-        
+        </div>
+    `;
+    
         // Add individual items
         yearItems.forEach(item => {
             const itemElement = document.createElement('div');
@@ -949,8 +977,8 @@ function createBudgetPostElement(chapter) {
                 <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">
                     ${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)
                 </span>
-            </p>
-        </div>
+                </p>
+            </div>
         <div class="post-chart" id="post-chart-${chapter.kap_navn.replace(/[^a-zA-Z0-9]/g, '-')}"></div>
     `;
     
@@ -968,8 +996,21 @@ function createBudgetPostElement(chapter) {
 }
 
 function createMiniChart(container, amount2024, amount2025, amount2026, label) {
-    const width = 350;
-    const height = 180;
+    // Responsive sizing based on screen width
+    const isMobile = window.innerWidth <= 768;
+    const isSmallMobile = window.innerWidth <= 480;
+    
+    let width, height;
+    if (isSmallMobile) {
+        width = 280;
+        height = 120;
+    } else if (isMobile) {
+        width = 320;
+        height = 150;
+    } else {
+        width = 350;
+        height = 180;
+    }
     const margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;

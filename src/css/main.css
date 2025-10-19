@@ -776,6 +776,51 @@ body {
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+    /* Header mobile adjustments */
+    .header-container {
+        padding: 0 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .site-title {
+        font-size: 1.5rem;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .header-actions {
+        gap: 0.25rem;
+    }
+    
+    .drill-up-button,
+    .nav-toggle,
+    .theme-toggle {
+        padding: 0.4rem;
+    }
+    
+    .drill-up-button i,
+    .nav-toggle i,
+    .theme-toggle i {
+        width: 18px;
+        height: 18px;
+    }
+    
+    /* Breadcrumb mobile adjustments */
+    .site-title .breadcrumb-item {
+        font-size: 1rem;
+    }
+    
+    .site-title .breadcrumb-item:first-child {
+        font-size: 1.5rem;
+    }
+    
+    .site-title .breadcrumb-separator {
+        font-size: 0.875rem;
+        margin: 0 0.25rem;
+    }
+    
+    /* Navigation menu mobile */
     .nav-menu {
         width: 100%;
         left: -100%;
@@ -783,6 +828,202 @@ body {
     
     .nav-menu.active {
         left: 0;
+    }
+    
+    .nav-menu-header {
+        padding: 1rem;
+    }
+    
+    .nav-menu-header h2 {
+        font-size: 1.125rem;
+    }
+    
+    /* Main content mobile */
+    .main-content {
+        padding: 1rem 0;
+    }
+    
+    .container {
+        padding: 0 1rem;
+    }
+    
+    /* Department cards mobile */
+    .department-chart-block {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .department-title {
+        font-size: 1.5rem;
+        line-height: 1.4;
+    }
+    
+    .department-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    /* Chart containers mobile */
+    .chart-container {
+        height: 250px;
+    }
+    
+    /* Budget post cards mobile */
+    .budget-post-item {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .post-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .post-title {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+    
+    .post-amounts {
+        align-self: flex-end;
+        gap: 0.2rem;
+    }
+    
+    .post-amount,
+    .post-amount-secondary {
+        font-size: 1rem;
+    }
+    
+    .post-details {
+        font-size: 0.85rem;
+    }
+    
+    /* Mini charts mobile */
+    .post-chart {
+        height: 120px;
+        margin-top: 0.75rem;
+    }
+    
+    /* Drill-down view mobile */
+    .drill-down-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .drill-down-title {
+        font-size: 1.5rem;
+        line-height: 1.3;
+    }
+    
+    .back-button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Footer mobile */
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    
+    .footer-section .source-link,
+    .footer-section .contact-link {
+        justify-content: center;
+    }
+    
+    /* Navigation menu items mobile */
+    .nav-menu-item {
+        padding: 0.75rem 1rem;
+    }
+    
+    .nav-menu-item-title {
+        font-size: 0.9rem;
+    }
+    
+    .nav-menu-item-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    /* Year breakdown mobile */
+    .year-breakdown {
+        margin-top: 0.75rem;
+    }
+    
+    .year-breakdown .post-title {
+        font-size: 0.9rem;
+    }
+    
+    .budget-item-detail {
+        padding: 0.4rem;
+        margin-top: 0.4rem;
+    }
+    
+    .detail-label,
+    .detail-amount {
+        font-size: 0.8rem;
+    }
+}
+
+/* Extra small mobile adjustments */
+@media (max-width: 480px) {
+    .header-container {
+        padding: 0 0.75rem;
+    }
+    
+    .site-title {
+        font-size: 1.25rem;
+    }
+    
+    .site-title .breadcrumb-item:first-child {
+        font-size: 1.25rem;
+    }
+    
+    .container {
+        padding: 0 0.75rem;
+    }
+    
+    .department-chart-block {
+        padding: 0.75rem;
+    }
+    
+    .department-title {
+        font-size: 1.25rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+    
+    .budget-post-item {
+        padding: 0.75rem;
+    }
+    
+    .post-title {
+        font-size: 0.95rem;
+    }
+    
+    .post-amount,
+    .post-amount-secondary {
+        font-size: 0.9rem;
+    }
+    
+    .post-chart {
+        height: 100px;
+    }
+    
+    .drill-down-title {
+        font-size: 1.25rem;
+    }
+    
+    .nav-menu-header {
+        padding: 0.75rem;
+    }
+    
+    .nav-menu-item {
+        padding: 0.6rem 0.75rem;
     }
 }
 
