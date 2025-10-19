@@ -181,6 +181,40 @@ async function loadBudgetData() {
         budgetData['2025'] = (data2025.Data || data2025).map(item => ({ ...item, year: 2025 }));
         console.log(`Loaded ${budgetData['2025'].length} budget items for 2025`);
         
+        // Load 2026 budget
+        console.log('Fetching 2026 data from: ./data/json/2026_gulbok_datagrunnlag.json');
+        let response2026;
+        try {
+            response2026 = await fetch('./data/json/2026_gulbok_datagrunnlag.json');
+        } catch (fetchError) {
+            console.error('Fetch error for 2026 data:', fetchError);
+            throw new Error(`Network error loading 2026 data: ${fetchError.message}`);
+        }
+        
+        console.log('2026 response status:', response2026.status, response2026.statusText);
+        
+        if (!response2026.ok) {
+            throw new Error(`HTTP error loading 2026 data! status: ${response2026.status} ${response2026.statusText}`);
+        }
+        
+        let data2026;
+        try {
+            data2026 = await response2026.json();
+        } catch (jsonError) {
+            console.error('JSON parse error for 2026 data:', jsonError);
+            throw new Error(`JSON parse error for 2026 data: ${jsonError.message}`);
+        }
+        
+        console.log('2026 data structure:', Object.keys(data2026));
+        console.log('2026 Data array length:', data2026.Data ? data2026.Data.length : 'No Data key');
+        
+        if (!data2026.Data && !Array.isArray(data2026)) {
+            throw new Error('2026 data does not contain expected Data array');
+        }
+        
+        budgetData['2026'] = (data2026.Data || data2026).map(item => ({ ...item, year: 2026 }));
+        console.log(`Loaded ${budgetData['2026'].length} budget items for 2026`);
+        
         // Load 2024 budget
         console.log('Fetching 2024 data from: ./data/json/gul_bok_2024_datagrunnlag.json');
         let response2024;
@@ -224,9 +258,13 @@ async function loadBudgetData() {
             ...item,
             fdep_navn: item.fdep_navn === 'Olje- og energidepartementet' ? 'Energidepartementet' : item.fdep_navn
         }));
+        budgetData['2026'] = budgetData['2026'].map(item => ({
+            ...item,
+            fdep_navn: item.fdep_navn === 'Olje- og energidepartementet' ? 'Energidepartementet' : item.fdep_navn
+        }));
         
         // Combine datasets
-        budgetData.combined = [...budgetData['2024'], ...budgetData['2025']];
+        budgetData.combined = [...budgetData['2024'], ...budgetData['2025'], ...budgetData['2026']];
         console.log(`Total budget items: ${budgetData.combined.length}`);
         
         // Setup navigation
@@ -541,10 +579,15 @@ function createDepartmentAggregateCard(deptData) {
         return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
     
-    const change = total2025 - total2024;
+    const total2026 = deptData['2026'].reduce((sum, item) => {
+        const amount = parseFloat(item['beløp'] || item['belop'] || 0);
+        return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+    
+    const change = total2026 - total2024;
     let changePercent = '0%';
     
-    if (total2024 === 0 && total2025 > 0) {
+    if (total2024 === 0 && total2026 > 0) {
         changePercent = '∞';
     } else if (total2024 > 0) {
         const percent = ((change / total2024) * 100);
@@ -573,6 +616,8 @@ function createDepartmentAggregateCard(deptData) {
             <div class="year-amount">${formatAmount(total2024)}</div>
             <div class="year-label">2025</div>
             <div class="year-amount">${formatAmount(total2025)}</div>
+            <div class="year-label">2026</div>
+            <div class="year-amount">${formatAmount(total2026)}</div>
             <div class="net-change-label">NET CHANGE</div>
             <div class="net-change-value" style="color: ${change >= 0 ? '#2E7D32' : '#C62828'};">
                 (${change >= 0 ? '+' : ''}${changePercent}) ${formatAmount(Math.abs(change))}
@@ -637,7 +682,7 @@ function createDepartmentAggregateCard(deptData) {
         }
         .year-comparison {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
             margin: 30px 0;
             font-size: 20px;
@@ -743,7 +788,7 @@ function createDepartmentAggregateCard(deptData) {
     setTimeout(() => {
         const chartContainer = card.querySelector('.html-chart');
         if (chartContainer) {
-            createHTMLChart(chartContainer, total2024, total2025, deptData.name);
+            createHTMLChart(chartContainer, total2024, total2025, total2026, deptData.name);
         }
     }, 100);
     
@@ -769,7 +814,8 @@ function renderComparisonView(filtered) {
                 omrNavn: item.omr_navn,
                 katNavn: item.kat_navn,
                 '2024': [],
-                '2025': []
+                '2025': [],
+                '2026': []
             };
         }
         groupedByPost[key][item.year].push(item);
@@ -782,7 +828,8 @@ function renderComparisonView(filtered) {
         console.log(`Group ${index + 1}:`, {
             post: `${group.postNr} - ${group.postNavn}`,
             '2024 items': group['2024'].length,
-            '2025 items': group['2025'].length
+            '2025 items': group['2025'].length,
+            '2026 items': group['2026'].length
         });
     });
     
@@ -814,7 +861,7 @@ function renderComparisonView(filtered) {
         deptGrid.className = 'department-grid';
         
         posts.forEach(data => {
-            const card = createComparisonCard(data, data['2024'], data['2025']);
+            const card = createComparisonCard(data, data['2024'], data['2025'], data['2026']);
             deptGrid.appendChild(card);
         });
         
@@ -824,7 +871,7 @@ function renderComparisonView(filtered) {
 }
 
 // Create comparison card showing both years
-function createComparisonCard(postData, items2024, items2025) {
+function createComparisonCard(postData, items2024, items2025, items2026) {
     const card = document.createElement('div');
     card.className = 'budget-card comparison-card';
     
@@ -839,14 +886,19 @@ function createComparisonCard(postData, items2024, items2025) {
         return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
     
-    const change = total2025 - total2024;
+    const total2026 = items2026.reduce((sum, item) => {
+        const amount = parseFloat(item['beløp'] || item['belop'] || 0);
+        return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+    
+    const change = total2026 - total2024;
     let changePercent = '0%';
     let changeText = '0%';
     
-    if (total2024 === 0 && total2025 > 0) {
+    if (total2024 === 0 && total2026 > 0) {
         changePercent = '∞';
         changeText = 'Ny post';
-    } else if (total2024 === 0 && total2025 === 0) {
+    } else if (total2024 === 0 && total2026 === 0) {
         changePercent = '0%';
         changeText = '0%';
     } else if (total2024 > 0) {
@@ -880,6 +932,8 @@ function createComparisonCard(postData, items2024, items2025) {
             <div class="year-amount">${formatAmount(total2024)}</div>
             <div class="year-label">2025</div>
             <div class="year-amount">${formatAmount(total2025)}</div>
+            <div class="year-label">2026</div>
+            <div class="year-amount">${formatAmount(total2026)}</div>
             <div class="net-change-label">NET CHANGE</div>
             <div class="net-change-value" style="color: ${change >= 0 ? '#2E7D32' : '#C62828'};">
                 (${change >= 0 ? '+' : '-'}${changeText}) ${formatAmount(Math.abs(change))}
@@ -950,7 +1004,7 @@ function createComparisonCard(postData, items2024, items2025) {
         }
         .year-comparison {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
             margin: 30px 0;
             font-size: 20px;
@@ -1035,7 +1089,7 @@ function createComparisonCard(postData, items2024, items2025) {
     setTimeout(() => {
         const chartContainer = card.querySelector('.html-chart');
         if (chartContainer) {
-            createHTMLChart(chartContainer, total2024, total2025, `Post ${postData.postNr} · ${postData.postNavn}`);
+            createHTMLChart(chartContainer, total2024, total2025, total2026, `Post ${postData.postNr} · ${postData.postNavn}`);
         }
     }, 100); // Slightly longer delay to ensure DOM is ready
     
@@ -1043,7 +1097,7 @@ function createComparisonCard(postData, items2024, items2025) {
 }
 
 // Create HTML/SVG chart for comparison
-function createHTMLChart(container, amount2024, amount2025, label) {
+function createHTMLChart(container, amount2024, amount2025, amount2026, label) {
     // Clear existing content
     container.innerHTML = '';
     
@@ -1054,8 +1108,8 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     const bottomPadding = 15; // Extra padding at bottom for x-axis labels
     
     // Calculate min/max for scaling
-    const minAmount = Math.min(amount2024, amount2025);
-    const maxAmount = Math.max(amount2024, amount2025);
+    const minAmount = Math.min(amount2024, amount2025, amount2026);
+    const maxAmount = Math.max(amount2024, amount2025, amount2026);
     const range = maxAmount - minAmount;
     const chartPadding = range * 0.1;
     
@@ -1074,16 +1128,18 @@ function createHTMLChart(container, amount2024, amount2025, label) {
         return value.toString();
     }
     
-    // Determine colors
-    const isIncrease = amount2025 >= amount2024;
+    // Determine colors - use overall trend from 2024 to 2026
+    const isIncrease = amount2026 >= amount2024;
     const lineColor = isIncrease ? '#2E7D32' : '#C62828';
     const fillColor = isIncrease ? '#2E7D32' : '#C62828';
     
     // Calculate positions - start line to the right of y-axis labels
     const x1 = 25; // Start to the right of y-axis labels
-    const x2 = 285; // Very close to right edge
+    const x2 = 155; // Middle point
+    const x3 = 285; // Very close to right edge
     const y1 = height - bottomPadding - ((amount2024 - yMin) / (yMax - yMin)) * (height - padding - bottomPadding);
     const y2 = height - bottomPadding - ((amount2025 - yMin) / (yMax - yMin)) * (height - padding - bottomPadding);
+    const y3 = height - bottomPadding - ((amount2026 - yMin) / (yMax - yMin)) * (height - padding - bottomPadding);
     
     // Create SVG chart that fills the container exactly
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1092,25 +1148,35 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     svg.style.width = '100%';
     svg.style.height = '100%';
     
-    // Create filled area path
+    // Create filled area path for 3 data points
     const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const areaD = `M ${x1} ${height - bottomPadding} L ${x1} ${y1} L ${x2} ${y2} L ${x2} ${height - bottomPadding} Z`;
+    const areaD = `M ${x1} ${height - bottomPadding} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} L ${x3} ${height - bottomPadding} Z`;
     areaPath.setAttribute('d', areaD);
     areaPath.setAttribute('fill', fillColor);
     areaPath.setAttribute('fill-opacity', '0.15');
     areaPath.setAttribute('stroke', 'none');
     svg.appendChild(areaPath);
     
-    // Create line
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', x1);
-    line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2);
-    line.setAttribute('y2', y2);
-    line.setAttribute('stroke', lineColor);
-    line.setAttribute('stroke-width', '2');
-    line.setAttribute('stroke-linecap', 'round');
-    svg.appendChild(line);
+    // Create line segments for 3 data points
+    const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line1.setAttribute('x1', x1);
+    line1.setAttribute('y1', y1);
+    line1.setAttribute('x2', x2);
+    line1.setAttribute('y2', y2);
+    line1.setAttribute('stroke', lineColor);
+    line1.setAttribute('stroke-width', '2');
+    line1.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(line1);
+    
+    const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line2.setAttribute('x1', x2);
+    line2.setAttribute('y1', y2);
+    line2.setAttribute('x2', x3);
+    line2.setAttribute('y2', y3);
+    line2.setAttribute('stroke', lineColor);
+    line2.setAttribute('stroke-width', '2');
+    line2.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(line2);
     
     // Add grid lines - span the chart area starting from x1
     for (let i = 1; i < 2; i++) {
@@ -1118,7 +1184,7 @@ function createHTMLChart(container, amount2024, amount2025, label) {
         const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         gridLine.setAttribute('x1', x1);
         gridLine.setAttribute('y1', gridY);
-        gridLine.setAttribute('x2', x2);
+        gridLine.setAttribute('x2', x3);
         gridLine.setAttribute('y2', gridY);
         gridLine.setAttribute('stroke', '#e5e5e5');
         gridLine.setAttribute('stroke-width', '0.5');
@@ -1126,21 +1192,22 @@ function createHTMLChart(container, amount2024, amount2025, label) {
     }
     
     // Add axis labels - positioned at line endpoints with smart padding
-    const yLabels = ['2024', '2025'];
-    yLabels.forEach((label, index) => {
+    const yearLabels = ['2024', '2025', '2026'];
+    const xPositions = [x1, x2, x3];
+    yearLabels.forEach((label, index) => {
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         // Move x-axis labels slightly to the right for better alignment
-        text.setAttribute('x', index === 0 ? x1 + 3 : x2 + 3);
+        text.setAttribute('x', xPositions[index] + 3);
         // Position at bottom of chart area
         text.setAttribute('y', height - 5);
         
         // Smart text alignment: first=left, last=right, middle=middle
         let textAnchor;
-        if (yLabels.length === 1) {
+        if (yearLabels.length === 1) {
             textAnchor = 'middle'; // Single label
         } else if (index === 0) {
             textAnchor = 'start'; // First label - left aligned
-        } else if (index === yLabels.length - 1) {
+        } else if (index === yearLabels.length - 1) {
             textAnchor = 'end'; // Last label - right aligned
         } else {
             textAnchor = 'middle'; // Middle labels - center aligned
