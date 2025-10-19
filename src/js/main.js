@@ -606,20 +606,30 @@ function showDrillDown(departmentName) {
         item.fdep_navn && item.fdep_navn.trim() === departmentName
     );
     
-    // Group by budget post (kap_nr + post_nr)
+    // Group by budget chapter (kap_navn) instead of individual posts
     const groupedPosts = {};
     deptItems.forEach(item => {
+        const chapterKey = item.kap_navn;
+        if (!groupedPosts[chapterKey]) {
+            groupedPosts[chapterKey] = {
+                kap_navn: item.kap_navn,
+                items: [],
+                posts: {} // Track individual posts within this chapter
+            };
+        }
+        groupedPosts[chapterKey].items.push(item);
+        
+        // Track individual posts
         const postKey = `${item.kap_nr}.${item.post_nr} - ${item.post_navn}`;
-        if (!groupedPosts[postKey]) {
-            groupedPosts[postKey] = {
+        if (!groupedPosts[chapterKey].posts[postKey]) {
+            groupedPosts[chapterKey].posts[postKey] = {
                 kap_nr: item.kap_nr,
                 post_nr: item.post_nr,
                 post_navn: item.post_navn,
-                kap_navn: item.kap_navn,
                 items: []
             };
         }
-        groupedPosts[postKey].items.push(item);
+        groupedPosts[chapterKey].posts[postKey].items.push(item);
     });
     
     // Render budget posts
@@ -646,14 +656,14 @@ function showOverview() {
     overviewView.style.display = 'block';
 }
 
-function showBudgetPostDetails(post) {
+function showBudgetChapterDetails(chapter) {
     const overviewView = document.getElementById('overview-view');
     const drillDownView = document.getElementById('drill-down-view');
     const drillDownTitle = document.getElementById('drill-down-title');
     const budgetPostsGrid = document.getElementById('budget-posts-grid');
     
-    // Update navigation path to include the budget post
-    navigationPath = ['Statsbudsjettet', navigationPath[1] || 'Departement', post.kap_navn];
+    // Update navigation path to include the budget chapter
+    navigationPath = ['Statsbudsjettet', navigationPath[1] || 'Departement', chapter.kap_navn];
     updateHeaderTitle();
     
     // Hide overview, show drill-down
@@ -661,54 +671,15 @@ function showBudgetPostDetails(post) {
     drillDownView.classList.add('active');
     
     // Update title
-    drillDownTitle.textContent = `${post.kap_navn} - Detaljer`;
+    drillDownTitle.textContent = `${chapter.kap_navn} - Poster`;
     
-    // Show individual budget items within this post
+    // Show individual posts within this chapter
     budgetPostsGrid.innerHTML = '';
     
-    // Group items by year and show detailed breakdown
-    const itemsByYear = {};
-    post.items.forEach(item => {
-        if (!itemsByYear[item.year]) {
-            itemsByYear[item.year] = [];
-        }
-        itemsByYear[item.year].push(item);
-    });
-    
-    // Create detailed breakdown
-    Object.keys(itemsByYear).sort().forEach(year => {
-        const yearItems = itemsByYear[year];
-        
-        const yearElement = document.createElement('div');
-        yearElement.className = 'budget-post-item';
-        
-        const yearTotal = yearItems.reduce((sum, item) => sum + (item.beløp || 0), 0);
-        
-        yearElement.innerHTML = `
-            <div class="post-header">
-                <h3 class="post-title">${year} - ${post.kap_navn}</h3>
-                <span class="post-amount">${formatAmount(yearTotal)}</span>
-        </div>
-            <div class="post-details">
-                <p><strong>Antall poster:</strong> ${yearItems.length}</p>
-                <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
-        </div>
-        `;
-        
-        // Add individual items
-        yearItems.forEach(item => {
-            const itemElement = document.createElement('div');
-            itemElement.className = 'budget-item-detail';
-            itemElement.innerHTML = `
-                <div class="detail-row">
-                    <span class="detail-label">${item.stikkord || 'Ingen stikkord'}</span>
-                    <span class="detail-amount">${formatAmount(item.beløp)}</span>
-        </div>
-    `;
-            yearElement.appendChild(itemElement);
-        });
-        
-        budgetPostsGrid.appendChild(yearElement);
+    // Create individual post elements
+    Object.values(chapter.posts).forEach(post => {
+        const postElement = createIndividualBudgetPostElement(post);
+        budgetPostsGrid.appendChild(postElement);
     });
     
     // Add back button functionality
@@ -724,7 +695,7 @@ function showBudgetPostDetails(post) {
     };
 }
 
-function createBudgetPostElement(post) {
+function createIndividualBudgetPostElement(post) {
     const postElement = document.createElement('div');
     postElement.className = 'budget-post-item';
     
@@ -745,7 +716,7 @@ function createBudgetPostElement(post) {
     
     postElement.innerHTML = `
         <div class="post-header">
-            <h3 class="post-title clickable-title">${post.kap_navn}</h3>
+            <h3 class="post-title clickable-title">${post.post_navn}</h3>
             <div class="post-amounts">
                 <span class="post-amount">2026: ${formatAmount(total2026)}</span>
                 <span class="post-amount-secondary">2025: ${formatAmount(total2025)}</span>
@@ -772,6 +743,141 @@ function createBudgetPostElement(post) {
     // Create mini chart for this post
     const chartContainer = postElement.querySelector(`#post-chart-${post.kap_nr}-${post.post_nr}`);
     createMiniChart(chartContainer, total2024, total2025, total2026, post.post_navn);
+    
+    return postElement;
+}
+
+function showBudgetPostDetails(post) {
+    const overviewView = document.getElementById('overview-view');
+    const drillDownView = document.getElementById('drill-down-view');
+    const drillDownTitle = document.getElementById('drill-down-title');
+    const budgetPostsGrid = document.getElementById('budget-posts-grid');
+    
+    // Update navigation path to include the budget post
+    navigationPath = ['Statsbudsjettet', navigationPath[1] || 'Departement', navigationPath[2] || 'Kapittel', post.post_navn];
+    updateHeaderTitle();
+    
+    // Hide overview, show drill-down
+    overviewView.style.display = 'none';
+    drillDownView.classList.add('active');
+    
+    // Update title
+    drillDownTitle.textContent = `${post.post_navn} - Detaljer`;
+    
+    // Show individual budget items within this post
+    budgetPostsGrid.innerHTML = '';
+    
+    // Group items by year and show detailed breakdown
+    const itemsByYear = {};
+    post.items.forEach(item => {
+        if (!itemsByYear[item.year]) {
+            itemsByYear[item.year] = [];
+        }
+        itemsByYear[item.year].push(item);
+    });
+    
+    // Create detailed breakdown
+    Object.keys(itemsByYear).sort().forEach(year => {
+        const yearItems = itemsByYear[year];
+        
+        const yearElement = document.createElement('div');
+        yearElement.className = 'budget-post-item';
+        
+        const yearTotal = yearItems.reduce((sum, item) => sum + (item.beløp || 0), 0);
+        
+        yearElement.innerHTML = `
+            <div class="post-header">
+                <h3 class="post-title">${year} - ${post.post_navn}</h3>
+                <span class="post-amount">${formatAmount(yearTotal)}</span>
+            </div>
+            <div class="post-details">
+                <p><strong>Antall poster:</strong> ${yearItems.length}</p>
+                <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
+            </div>
+        `;
+        
+        // Add individual items
+        yearItems.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'budget-item-detail';
+            itemElement.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">${item.stikkord || 'Ingen stikkord'}</span>
+                    <span class="detail-amount">${formatAmount(item.beløp)}</span>
+                </div>
+            `;
+            yearElement.appendChild(itemElement);
+        });
+        
+        budgetPostsGrid.appendChild(yearElement);
+    });
+    
+    // Add back button functionality
+    const backButton = document.getElementById('back-button');
+    backButton.onclick = () => {
+        // Go back to chapter view
+        const chapterName = navigationPath[2];
+        if (chapterName) {
+            // Find the chapter and go back to it
+            const departmentName = navigationPath[1];
+            showDrillDown(departmentName);
+        } else {
+            showOverview();
+        }
+    };
+}
+
+function createBudgetPostElement(chapter) {
+    const postElement = document.createElement('div');
+    postElement.className = 'budget-post-item';
+    
+    // Calculate totals for each year across all posts in this chapter
+    const totals = {};
+    ['2024', '2025', '2026'].forEach(year => {
+        totals[year] = chapter.items
+            .filter(item => item.year === parseInt(year))
+            .reduce((sum, item) => sum + (item.beløp || 0), 0);
+    });
+    
+    const total2024 = totals['2024'] || 0;
+    const total2025 = totals['2025'] || 0;
+    const total2026 = totals['2026'] || 0;
+    
+    const change24to26 = total2026 - total2024;
+    const changePercent = total2024 !== 0 ? ((change24to26 / total2024) * 100).toFixed(1) : '0.0';
+    
+    // Count number of posts in this chapter
+    const postCount = Object.keys(chapter.posts).length;
+    
+    postElement.innerHTML = `
+        <div class="post-header">
+            <h3 class="post-title clickable-title">${chapter.kap_navn}</h3>
+            <div class="post-amounts">
+                <span class="post-amount">2026: ${formatAmount(total2026)}</span>
+                <span class="post-amount-secondary">2025: ${formatAmount(total2025)}</span>
+                <span class="post-amount-secondary">2024: ${formatAmount(total2024)}</span>
+            </div>
+        </div>
+        <div class="post-details">
+            <p><strong>Antall poster:</strong> ${postCount}</p>
+            <p><strong>Endring 2024-2026:</strong> 
+                <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">
+                    ${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)
+                </span>
+            </p>
+        </div>
+        <div class="post-chart" id="post-chart-${chapter.kap_navn.replace(/[^a-zA-Z0-9]/g, '-')}"></div>
+    `;
+    
+    // Add click event to title for deeper drill-down
+    const titleElement = postElement.querySelector('.post-title');
+    titleElement.addEventListener('click', () => {
+        showBudgetChapterDetails(chapter);
+    });
+    
+    // Create mini chart for this chapter
+    const chartContainer = postElement.querySelector(`#post-chart-${chapter.kap_navn.replace(/[^a-zA-Z0-9]/g, '-')}`);
+    createMiniChart(chartContainer, total2024, total2025, total2026, chapter.kap_navn);
     
     return postElement;
 }
