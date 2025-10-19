@@ -248,10 +248,14 @@ function drillUpOneLevel() {
         return; // Already at top level
     }
     
+    // Store current path length to determine where we're going back to
+    const currentPathLength = navigationPath.length;
+    
     // Remove the last item from navigation path
     navigationPath.pop();
     updateHeaderTitle();
     
+    // Navigate back to the appropriate view based on the new path length
     if (navigationPath.length === 1) {
         // Back to main view
         showOverview();
@@ -260,9 +264,46 @@ function drillUpOneLevel() {
         const departmentName = navigationPath[1];
         showDrillDown(departmentName);
     } else if (navigationPath.length === 3) {
-        // Back to chapter view
+        // Back to chapter view - need to find the chapter and show its details
         const departmentName = navigationPath[1];
-        showDrillDown(departmentName);
+        const chapterName = navigationPath[2];
+        
+        // Find the chapter data and show its details
+        const deptItems = budgetData.combined.filter(item => 
+            item.fdep_navn && item.fdep_navn.trim() === departmentName
+        );
+        
+        const groupedPosts = {};
+        deptItems.forEach(item => {
+            const chapterKey = item.kap_navn;
+            if (!groupedPosts[chapterKey]) {
+                groupedPosts[chapterKey] = {
+                    kap_navn: item.kap_navn,
+                    items: [],
+                    posts: {}
+                };
+            }
+            groupedPosts[chapterKey].items.push(item);
+            
+            const postKey = `${item.kap_nr}.${item.post_nr} - ${item.post_navn}`;
+            if (!groupedPosts[chapterKey].posts[postKey]) {
+                groupedPosts[chapterKey].posts[postKey] = {
+                    kap_nr: item.kap_nr,
+                    post_nr: item.post_nr,
+                    post_navn: item.post_navn,
+                    items: []
+                };
+            }
+            groupedPosts[chapterKey].posts[postKey].items.push(item);
+        });
+        
+        const chapter = groupedPosts[chapterName];
+        if (chapter) {
+            showBudgetChapterDetails(chapter);
+        } else {
+            // Fallback to department view if chapter not found
+            showDrillDown(departmentName);
+        }
     }
 }
 
