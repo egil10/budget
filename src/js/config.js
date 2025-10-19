@@ -79,9 +79,80 @@ const CONFIG = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CONFIG;
-} else {
-    window.CONFIG = CONFIG;
+// Export for ES6 modules
+export const DEPARTMENT_COLORS = {
+    'Arbeids- og inkluderingsdepartementet': '#3b82f6',
+    'Barne- og familiedepartementet': '#10b981',
+    'Digitaliserings- og forvaltningsdepartementet': '#f59e0b',
+    'Energidepartementet': '#ef4444',
+    'Finansdepartementet': '#8b5cf6',
+    'Forsvarsdepartementet': '#06b6d4',
+    'Helse- og omsorgsdepartementet': '#84cc16',
+    'Justis- og beredskapsdepartementet': '#f97316',
+    'Klima- og miljødepartementet': '#22c55e',
+    'Kommunal- og distriktsdepartementet': '#eab308',
+    'Kultur- og likestillingsdepartementet': '#ec4899',
+    'Kunnskapsdepartementet': '#6366f1',
+    'Landbruks- og matdepartementet': '#14b8a6',
+    'Nærings- og fiskeridepartementet': '#f43f5e',
+    'Samferdselsdepartementet': '#0ea5e9',
+    'Utenriksdepartementet': '#a855f7',
+    'Ymse': '#64748b'
+};
+
+export const CHART_CONFIG = {
+    WIDTH: 300,
+    HEIGHT: 100,
+    PADDING: 10,
+    BOTTOM_PADDING: 15,
+    LINE_WIDTH: 2,
+    COLORS: {
+        INCREASE: '#2E7D32',
+        DECREASE: '#C62828',
+        GRID: '#e5e5e5',
+        TEXT: '#333333',
+        TEXT_SECONDARY: '#666666'
+    }
+};
+
+// Utility functions
+export function formatAmount(value) {
+    if (value >= 1000000000) {
+        return (value / 1000000000).toFixed(1) + 'B';
+    } else if (value >= 1000000) {
+        return (value / 1000000).toFixed(0) + 'M';
+    } else if (value >= 1000) {
+        return (value / 1000).toFixed(0) + 'K';
+    }
+    return value.toString();
 }
+
+export function formatNumber(value) {
+    return new Intl.NumberFormat('no-NO').format(value);
+}
+
+export function getDepartmentAbbreviation(deptName) {
+    const abbreviations = {
+        'Arbeids- og inkluderingsdepartementet': 'AID',
+        'Barne- og familiedepartementet': 'BFD',
+        'Digitaliserings- og forvaltningsdepartementet': 'DFD',
+        'Energidepartementet': 'ED',
+        'Finansdepartementet': 'FIN',
+        'Forsvarsdepartementet': 'FD',
+        'Helse- og omsorgsdepartementet': 'HOD',
+        'Justis- og beredskapsdepartementet': 'JD',
+        'Klima- og miljødepartementet': 'KLD',
+        'Kommunal- og distriktsdepartementet': 'KDD',
+        'Kultur- og likestillingsdepartementet': 'KUD',
+        'Kunnskapsdepartementet': 'KD',
+        'Landbruks- og matdepartementet': 'LMD',
+        'Nærings- og fiskeridepartementet': 'NFD',
+        'Samferdselsdepartementet': 'SD',
+        'Utenriksdepartementet': 'UD',
+        'Ymse': 'YMSE'
+    };
+    return abbreviations[deptName] || deptName.substring(0, 3).toUpperCase();
+}
+
+// Export the main config object as well
+export default CONFIG;

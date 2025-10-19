@@ -1,30 +1,82 @@
 // main.js - Main application logic for Budget Dashboard
 
-import { DEPARTMENT_COLORS, CHART_CONFIG, formatAmount, formatNumber } from './config.js';
-
 console.log('Budget Dashboard loading...');
+
+// Import configuration and utility functions
+const DEPARTMENT_COLORS = {
+    'Arbeids- og inkluderingsdepartementet': '#3b82f6',
+    'Barne- og familiedepartementet': '#10b981',
+    'Digitaliserings- og forvaltningsdepartementet': '#f59e0b',
+    'Energidepartementet': '#ef4444',
+    'Finansdepartementet': '#8b5cf6',
+    'Forsvarsdepartementet': '#06b6d4',
+    'Helse- og omsorgsdepartementet': '#84cc16',
+    'Justis- og beredskapsdepartementet': '#f97316',
+    'Klima- og miljødepartementet': '#22c55e',
+    'Kommunal- og distriktsdepartementet': '#eab308',
+    'Kultur- og likestillingsdepartementet': '#ec4899',
+    'Kunnskapsdepartementet': '#6366f1',
+    'Landbruks- og matdepartementet': '#14b8a6',
+    'Nærings- og fiskeridepartementet': '#f43f5e',
+    'Samferdselsdepartementet': '#0ea5e9',
+    'Utenriksdepartementet': '#a855f7',
+    'Ymse': '#64748b'
+};
+
+function formatAmount(value) {
+    if (value >= 1000000000) {
+        return (value / 1000000000).toFixed(1) + 'B';
+    } else if (value >= 1000000) {
+        return (value / 1000000).toFixed(0) + 'M';
+    } else if (value >= 1000) {
+        return (value / 1000).toFixed(0) + 'K';
+    }
+    return value.toString();
+}
+
+function formatNumber(value) {
+    return new Intl.NumberFormat('no-NO').format(value);
+}
+
+function getDepartmentAbbreviation(deptName) {
+    const abbreviations = {
+        'Arbeids- og inkluderingsdepartementet': 'AID',
+        'Barne- og familiedepartementet': 'BFD',
+        'Digitaliserings- og forvaltningsdepartementet': 'DFD',
+        'Energidepartementet': 'ED',
+        'Finansdepartementet': 'FIN',
+        'Forsvarsdepartementet': 'FD',
+        'Helse- og omsorgsdepartementet': 'HOD',
+        'Justis- og beredskapsdepartementet': 'JD',
+        'Klima- og miljødepartementet': 'KLD',
+        'Kommunal- og distriktsdepartementet': 'KDD',
+        'Kultur- og likestillingsdepartementet': 'KUD',
+        'Kunnskapsdepartementet': 'KD',
+        'Landbruks- og matdepartementet': 'LMD',
+        'Nærings- og fiskeridepartementet': 'NFD',
+        'Samferdselsdepartementet': 'SD',
+        'Utenriksdepartementet': 'UD',
+        'Ymse': 'YMSE'
+    };
+    return abbreviations[deptName] || deptName.substring(0, 3).toUpperCase();
+}
 
 
 // Global state
 let budgetData = {
     '2024': null,
     '2025': null,
+    '2026': null,
     combined: []
 };
 let currentFilter = 'all';
 let currentSort = 'default';
 let searchTerm = '';
-let currentYear = 'both'; // 'both', '2024', or '2025'
+let currentYear = 'both'; // 'both', '2024', '2025', or '2026'
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM loaded, initializing...');
-    
-    // Initialize UI components
-    initSidebar();
-    initFilters();
-    initSearch();
-    initSort();
     
     // Load budget data
     await loadBudgetData();
@@ -1116,17 +1168,7 @@ function createHTMLChart(container, amount2024, amount2025, amount2026, label) {
     const yMin = Math.max(0, minAmount - chartPadding);
     const yMax = maxAmount + chartPadding;
     
-    // Format amounts for display
-    function formatAmount(value) {
-        if (value >= 1000000000) {
-            return (value / 1000000000).toFixed(1) + 'B';
-        } else if (value >= 1000000) {
-            return (value / 1000000).toFixed(0) + 'M';
-        } else if (value >= 1000) {
-            return (value / 1000).toFixed(0) + 'K';
-        }
-        return value.toString();
-    }
+    // formatAmount function is now imported from config.js
     
     // Determine colors - use overall trend from 2024 to 2026
     const isIncrease = amount2026 >= amount2024;
@@ -1412,30 +1454,7 @@ function updateNavigationWithDepartments(departments) {
 }
 
 // Get official department abbreviations for navigation
-function getDepartmentAbbreviation(fullName) {
-    const abbreviations = {
-        'Arbeids- og inkluderingsdepartementet': 'AID',
-        'Barne- og familiedepartementet': 'BFD',
-        'Digitaliserings- og forvaltningsdepartementet': 'DFD',
-        'Energidepartementet': 'ED',
-        'Finansdepartementet': 'FIN',
-        'Forsvarsdepartementet': 'FD',
-        'Helse- og omsorgsdepartementet': 'HOD',
-        'Justis- og beredskapsdepartementet': 'JD',
-        'Klima- og miljødepartementet': 'KLD',
-        'Kommunal- og distriktsdepartementet': 'KDD',
-        'Kultur- og likestillingsdepartementet': 'KUD',
-        'Kunnskapsdepartementet': 'KD',
-        'Landbruks- og matdepartementet': 'LMD',
-        'Nærings- og fiskeridepartementet': 'NFD',
-        'Olje- og energidepartementet': 'OED',
-        'Samferdselsdepartementet': 'SD',
-        'Utenriksdepartementet': 'UD',
-        'Ymse': 'YMSE'
-    };
-    
-    return abbreviations[fullName] || fullName.substring(0, 8) + '...';
-}
+// getDepartmentAbbreviation function is now imported from config.js
 
 console.log('Budget Dashboard main.js loaded');
 
