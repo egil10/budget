@@ -240,6 +240,12 @@ body {
     margin-bottom: 1.5rem;
 }
 
+.department-header-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .department-title {
     font-family: var(--font-family);
     font-size: 1.75rem;
@@ -259,6 +265,32 @@ body {
     color: var(--text-secondary);
     font-size: 1rem;
     font-weight: 400;
+}
+
+/* Chart card actions aligned to right */
+.department-actions {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.department-actions button {
+    background: transparent;
+    border: none;
+    padding: 2px;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.department-actions button:hover {
+    color: var(--text-primary);
+}
+
+.department-actions i {
+    width: 14px;
+    height: 14px;
 }
 
 .department-chart {

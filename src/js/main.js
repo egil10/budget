@@ -1,3 +1,71 @@
+// Copy chart data as TSV to clipboard
+function copyChartData(dept) {
+    const rows = [
+        'date\tvalue\tindex',
+        `2024-01-01\t${dept.total2024}\t1`,
+        `2025-01-01\t${dept.total2025}\t2`,
+        `2026-01-01\t${dept.total2026}\t3`
+    ];
+    const tsv = rows.join('\n');
+    const doCopy = () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(tsv);
+        }
+        return new Promise(resolve => {
+            const textarea = document.createElement('textarea');
+            textarea.value = tsv;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(textarea);
+            resolve();
+        });
+    };
+    return doCopy();
+}
+
+// Download CSV of the chart data
+function downloadChartCSV(dept) {
+    const rows = [
+        ['date', 'value', 'index'],
+        ['2024-01-01', String(dept.total2024), '1'],
+        ['2025-01-01', String(dept.total2025), '2'],
+        ['2026-01-01', String(dept.total2026), '3']
+    ];
+    const csv = rows.map(r => r.map(v => /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${dept.name.replace(/\s+/g, '_')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Utility: temporary icon feedback
+function setButtonIcon(buttonEl, iconName) {
+    const i = buttonEl.querySelector('i');
+    if (!i) return;
+    i.setAttribute('data-lucide', iconName);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function withIconFeedback(buttonEl, baselineIcon, actionPromise) {
+    const run = () => {
+        Promise.resolve(actionPromise && actionPromise()).then(() => {
+            setButtonIcon(buttonEl, 'check');
+            setTimeout(() => setButtonIcon(buttonEl, baselineIcon), 1200);
+        }).catch(() => {
+            // brief error feedback (revert to baseline)
+            setTimeout(() => setButtonIcon(buttonEl, baselineIcon), 800);
+        });
+    };
+    // ensure baseline icon first
+    setButtonIcon(buttonEl, baselineIcon);
+    run();
+}
 // Statsbudsjettet - Simple Chart Layout
 
 console.log('Statsbudsjettet loading...');
@@ -25,14 +93,17 @@ const DEPARTMENT_COLORS = {
 
 // Utility functions
 function formatAmount(value) {
-    if (value >= 1000000000) {
-        return (value / 1000000000).toFixed(1) + 'B';
-    } else if (value >= 1000000) {
-        return (value / 1000000).toFixed(1) + 'M';
-    } else if (value >= 1000) {
-        return (value / 1000).toFixed(1) + 'K';
+    if (value === null || value === undefined || isNaN(value)) return '0';
+    const sign = value < 0 ? '-' : '';
+    const abs = Math.abs(value);
+    if (abs >= 1000000000) {
+        return sign + (abs / 1000000000).toFixed(1) + 'B';
+    } else if (abs >= 1000000) {
+        return sign + (abs / 1000000).toFixed(1) + 'M';
+    } else if (abs >= 1000) {
+        return sign + (abs / 1000).toFixed(1) + 'K';
     }
-    return value.toFixed(0);
+    return sign + abs.toFixed(0);
 }
 
 function formatNumber(value) {
@@ -55,7 +126,7 @@ let navigationPath = ['Statsbudsjettet'];
 const loadingScreen = document.getElementById('loading-screen');
 const app = document.getElementById('app');
 const departmentsGrid = document.getElementById('departments-grid');
-const themeToggle = document.getElementById('theme-toggle');
+const themeToggle = null; // removed
 const navToggle = document.getElementById('nav-toggle');
 const navMenu = document.getElementById('nav-menu');
 const navClose = document.getElementById('nav-close');
@@ -69,12 +140,15 @@ const drillUpButton = document.getElementById('drill-up-button');
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM loaded, initializing...');
     await loadBudgetData();
-    initThemeToggle();
+    // Force light theme
+    document.documentElement.setAttribute('data-theme', 'light');
     initLucideIcons();
     initNavigation();
     initSiteTitle();
     initDrillUp();
     renderDepartmentCharts();
+    // Ensure icons are rendered for initial buttons
+    setTimeout(() => initLucideIcons(), 0);
     initDrillDown();
     initResponsiveHandlers();
     hideLoadingScreen();
@@ -127,14 +201,25 @@ async function loadBudgetData() {
 
         await Promise.all(fetchPromises);
 
-        // Merge OLJE- OG ENERGIDEPARTEMENTET with Energidepartementet for all years
+        // Normalize department naming across years (trim + map renames)
         years.forEach(year => {
             if (budgetData[year]) {
                 budgetData[year] = budgetData[year].map(item => {
-                    if (item.fdep_navn === 'OLJE- OG ENERGIDEPARTEMENTET') {
-                        return { ...item, fdep_navn: 'Energidepartementet' };
+                    const originalName = item.fdep_navn || '';
+                    const trimmedName = typeof originalName === 'string' ? originalName.trim() : originalName;
+                    const lowerName = (trimmedName || '').toLowerCase();
+
+                    let normalizedName = trimmedName;
+                    // Harmonize 2024 "Olje- og energidepartementet" to "Energidepartementet"
+                    if (lowerName === 'olje- og energidepartementet') {
+                        normalizedName = 'Energidepartementet';
                     }
-                    return item;
+                    // Ensure consistent casing/spacing for Energidepartementet
+                    if (lowerName === 'energidepartementet') {
+                        normalizedName = 'Energidepartementet';
+                    }
+
+                    return { ...item, fdep_navn: normalizedName };
                 });
             }
         });
@@ -391,25 +476,7 @@ function updateQuickStats() {
 }
 
 // Theme toggle functionality
-function initThemeToggle() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-    }
-
-    if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        // Re-initialize Lucide icons after theme change
-        setTimeout(() => initLucideIcons(), 100);
-        });
-    }
-}
+// Theme toggle removed; always light theme
 
 // Get unique departments
 function getUniqueDepartments() {
@@ -473,15 +540,39 @@ function getDepartmentStats() {
     return departmentStats.sort((a, b) => b.total2026 - a.total2026); // Sort by 2026 total descending
 }
 
+// Aggregate stats for entire budget
+function getAggregateStats() {
+    const totals = { '2024': 0, '2025': 0, '2026': 0 };
+    ['2024', '2025', '2026'].forEach(year => {
+        const yearItems = budgetData.combined.filter(item => item.year === parseInt(year));
+        totals[year] = yearItems.reduce((sum, item) => sum + (item.beløp || 0), 0);
+    });
+    return {
+        name: 'Totalt statsbudsjett',
+        total2024: totals['2024'] || 0,
+        total2025: totals['2025'] || 0,
+        total2026: totals['2026'] || 0
+    };
+}
+
 // Render department charts
 function renderDepartmentCharts() {
     const departments = getDepartmentStats();
     departmentsGrid.innerHTML = '';
 
+    // Render aggregate chart first
+    const aggregate = getAggregateStats();
+    const aggregateBlock = createDepartmentChartBlock(aggregate);
+    aggregateBlock.querySelector('.department-subtitle').textContent = 'Totalt';
+    departmentsGrid.appendChild(aggregateBlock);
+
     departments.forEach(dept => {
         const chartBlock = createDepartmentChartBlock(dept);
         departmentsGrid.appendChild(chartBlock);
     });
+
+    // Ensure lucide icons render for newly inserted buttons
+    initLucideIcons();
 }
 
 // Create department chart block
@@ -492,7 +583,17 @@ function createDepartmentChartBlock(dept) {
 
     block.innerHTML = `
         <div class="department-header">
-            <h2 class="department-title">${dept.name}</h2>
+            <div class="department-header-top">
+                <h2 class="department-title">${dept.name}</h2>
+                <div class="department-actions">
+                    <button class="chart-copy" title="Kopier data" aria-label="Kopier data">
+                        <i data-lucide="clipboard"></i>
+                    </button>
+                    <button class="chart-download" title="Last ned" aria-label="Last ned">
+                        <i data-lucide="download"></i>
+                    </button>
+                </div>
+            </div>
             <p class="department-subtitle">Budsjett</p>
         </div>
         <div class="department-chart">
@@ -509,6 +610,20 @@ function createDepartmentChartBlock(dept) {
     // Create the chart
     const chartContainer = block.querySelector('.chart-container');
     createChart(chartContainer, dept);
+
+    // Hook actions
+    const copyBtn = block.querySelector('.chart-copy');
+    const downloadBtn = block.querySelector('.chart-download');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            withIconFeedback(copyBtn, 'clipboard', () => copyChartData(dept));
+        });
+    }
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(dept));
+        });
+    }
 
     return block;
 }
@@ -550,18 +665,36 @@ function createChart(container, dept) {
     const minAmount = Math.min(...validAmounts);
     const maxAmount = Math.max(...validAmounts);
 
-    // Add padding to min/max for better visual
+    // Robust y-domain selection
     const paddingFactor = 0.1;
-    const range = maxAmount - minAmount;
-    const paddedMin = range > 0 ? minAmount - range * paddingFactor : minAmount * 0.9;
-    const paddedMax = range > 0 ? maxAmount + range * paddingFactor : maxAmount * 1.1;
+    const baseRange = maxAmount - minAmount;
+    const hasNegative = minAmount < 0;
+    let paddedMin;
+    let paddedMax;
+    if (baseRange === 0) {
+        // All values equal: small band around the value
+        paddedMin = Math.min(Math.max(0, maxAmount * 0.9), maxAmount);
+        paddedMax = maxAmount * 1.1;
+    } else {
+        if (hasNegative) {
+            // Clamp lower bound to at least -100M to avoid -billions
+            paddedMin = Math.max(-100000000, minAmount - baseRange * 0.1);
+        } else {
+            // No negatives: allow a little headroom but never below 0
+            paddedMin = Math.max(0, minAmount - baseRange * 0.2);
+        }
+        paddedMax = maxAmount + baseRange * 0.1;
+        if (paddedMax <= paddedMin) paddedMax = paddedMin + Math.max(1, baseRange * 0.2);
+    }
 
     const xScale = (index) => margin.left + (innerWidth / (years.length - 1)) * index;
     const yScale = (amount) => {
         const safeAmount = isNaN(amount) || amount === null || amount === undefined ? 0 : amount;
-        const range = paddedMax - paddedMin;
-        if (range === 0) return margin.top + innerHeight / 2; // Center if no range
-        return margin.top + innerHeight - ((safeAmount - paddedMin) / range) * innerHeight;
+        const domainMin = paddedMin;
+        const domainMax = paddedMax;
+        const range = Math.max(1e-9, domainMax - domainMin);
+        const clamped = Math.max(domainMin, Math.min(domainMax, safeAmount));
+        return margin.top + innerHeight - ((clamped - domainMin) / range) * innerHeight;
     };
 
     // Create SVG
@@ -685,6 +818,8 @@ function createChart(container, dept) {
 
     container.innerHTML = '';
     container.appendChild(svg);
+    // attach svg reference for download
+    container._svg = svg;
 }
 
 // Drill-down functionality
@@ -1066,16 +1201,31 @@ function createMiniChart(container, amount2024, amount2025, amount2026, label) {
 
     const minAmount = Math.min(...validAmounts);
     const maxAmount = Math.max(...validAmounts);
-    const range = maxAmount - minAmount;
-    const paddedMin = range > 0 ? minAmount - range * 0.1 : minAmount * 0.9;
-    const paddedMax = range > 0 ? maxAmount + range * 0.1 : maxAmount * 1.1;
+    const baseRange = maxAmount - minAmount;
+    const hasNegative = minAmount < 0;
+    let paddedMin;
+    let paddedMax;
+    if (baseRange === 0) {
+        paddedMin = Math.min(Math.max(0, maxAmount * 0.9), maxAmount);
+        paddedMax = maxAmount * 1.1;
+    } else {
+        if (hasNegative) {
+            paddedMin = Math.max(-100000000, minAmount - baseRange * 0.1);
+        } else {
+            paddedMin = Math.max(0, minAmount - baseRange * 0.2);
+        }
+        paddedMax = maxAmount + baseRange * 0.1;
+        if (paddedMax <= paddedMin) paddedMax = paddedMin + Math.max(1, baseRange * 0.2);
+    }
 
     const xScale = (index) => margin.left + (innerWidth / (years.length - 1)) * index;
     const yScale = (amount) => {
         const safeAmount = isNaN(amount) || amount === null || amount === undefined ? 0 : amount;
-        const range = paddedMax - paddedMin;
-        if (range === 0) return margin.top + innerHeight / 2;
-        return margin.top + innerHeight - ((safeAmount - paddedMin) / range) * innerHeight;
+        const domainMin = paddedMin;
+        const domainMax = paddedMax;
+        const range = Math.max(1e-9, domainMax - domainMin);
+        const clamped = Math.max(domainMin, Math.min(domainMax, safeAmount));
+        return margin.top + innerHeight - ((clamped - domainMin) / range) * innerHeight;
     };
 
     // Create SVG
