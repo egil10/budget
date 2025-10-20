@@ -594,6 +594,12 @@ body {
     margin-bottom: 1rem;
 }
 
+.post-header-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .post-title {
     font-size: 1.125rem;
     font-weight: 600;
@@ -632,6 +638,21 @@ body {
     font-size: 0.9rem;
     color: var(--text-secondary);
     margin-bottom: 1rem;
+}
+
+.post-details-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-primary);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.post-amounts-inline {
+    display: flex;
+    gap: 1rem;
+    color: var(--text-secondary);
 }
 
 .post-chart {

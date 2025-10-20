@@ -931,6 +931,9 @@ function showBudgetChapterDetails(chapter) {
         budgetPostsGrid.appendChild(postElement);
     });
     
+    // Re-init icons for newly inserted content
+    initLucideIcons();
+
     // Add back button functionality
     const backButton = document.getElementById('back-button');
     backButton.onclick = () => {
@@ -964,34 +967,47 @@ function createIndividualBudgetPostElement(post) {
     const changePercent = total2024 !== 0 ? ((change24to26 / total2024) * 100).toFixed(1) : '0.0';
     
     postElement.innerHTML = `
-        <div class="post-header">
-            <h3 class="post-title clickable-title">${post.post_navn}</h3>
-            <div class="post-amounts">
-                <span class="post-amount">2026: ${formatAmount(total2026)}</span>
-                <span class="post-amount-secondary">2025: ${formatAmount(total2025)}</span>
-                <span class="post-amount-secondary">2024: ${formatAmount(total2024)}</span>
-        </div>
-        </div>
-        <div class="post-details">
-            <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
-            <p><strong>Endring 2024-2026:</strong> 
-                <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">
-                    ${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)
-                </span>
-            </p>
+        <div class="department-header">
+            <div class="department-header-top">
+                <h2 class="department-title">${post.post_navn}</h2>
+                <div class="department-actions">
+                    <button class="post-copy" title="Kopier data" aria-label="Kopier data">
+                        <i data-lucide="clipboard"></i>
+                    </button>
+                    <button class="post-download" title="Last ned" aria-label="Last ned">
+                        <i data-lucide="download"></i>
+                    </button>
+                </div>
             </div>
-        <div class="post-chart" id="post-chart-${post.kap_nr}-${post.post_nr}"></div>
+            <p class="department-subtitle">Antall poster: ${post.items.length} · Endring 2024-2026: <span style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></p>
+            <p class="department-subtitle">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</p>
+        </div>
+        <div class="department-chart">
+            <div class="chart-container" id="post-chart-${post.kap_nr}-${post.post_nr}"></div>
+        </div>
     `;
+
     
-    // Add click event to title for deeper drill-down
-    const titleElement = postElement.querySelector('.post-title');
-    titleElement.addEventListener('click', () => {
-        showBudgetPostDetails(post);
-    });
-    
-    // Create mini chart for this post
+    // Hook actions
+    const copyBtn = postElement.querySelector('.post-copy');
+    const downloadBtn = postElement.querySelector('.post-download');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
+            withIconFeedback(copyBtn, 'clipboard', () => copyChartData(deptLike));
+        });
+    }
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
+            withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(deptLike));
+        });
+    }
+
+    // Create full-size chart for this post (reuse main chart renderer)
     const chartContainer = postElement.querySelector(`#post-chart-${post.kap_nr}-${post.post_nr}`);
-    createMiniChart(chartContainer, total2024, total2025, total2026, post.post_navn);
+    const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
+    createChart(chartContainer, deptLike);
     
     return postElement;
 }
