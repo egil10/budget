@@ -373,23 +373,33 @@ body {
     color: var(--text-secondary);
     font-size: 1rem;
     font-weight: 400;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     align-items: center;
-    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .dept-posts {
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: 1rem;
     font-weight: 500;
     text-align: right;
+    grid-column: 3;
 }
 
 .dept-change {
-    font-size: 0.8rem;
+    font-size: 1rem;
     font-weight: 500;
     text-align: left;
+    grid-column: 1;
+}
+
+.dept-years {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: center;
+    grid-column: 2;
 }
 
 .subtitle-row {
@@ -1109,11 +1119,15 @@ body.nav-open {
     }
     
     .dept-posts {
-        font-size: 0.75rem;
+        font-size: 0.9rem;
     }
     
     .dept-change {
-        font-size: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .dept-years {
+        font-size: 0.9rem;
     }
     
     /* Chart containers mobile */

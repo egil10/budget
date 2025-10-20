@@ -801,6 +801,7 @@ function createDepartmentChartBlock(dept) {
         </div>
             <div class="department-subtitle">
                 <span class="dept-change">Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${changeText}</span></span>
+                <span class="dept-years">2024: ${formatAmount(dept.total2024)} · 2025: ${formatAmount(dept.total2025)} · 2026: ${formatAmount(dept.total2026)}</span>
                 <span class="dept-posts">Antall kapitler: ${chapterCount}</span>
             </div>
         </div>
@@ -1195,13 +1196,10 @@ function createIndividualBudgetPostElement(post) {
                     </button>
                 </div>
             </div>
-            <div class="department-subtitle subtitle-row">
-                <span class="subtitle-left">Endring 2024-2026: <span class="change-badge" style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
-                <span class="subtitle-right">Antall poster: ${post.items.length}</span>
-            </div>
-            <div class="department-subtitle subtitle-row">
-                <span class="subtitle-left">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
-                <span class="subtitle-right"></span>
+            <div class="department-subtitle">
+                <span class="dept-change">Endring 2024-2026: <span class="change-badge" style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
+                <span class="dept-years">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
+                <span class="dept-posts">Antall poster: ${post.items.length}</span>
             </div>
         </div>
         <div class="department-chart">
@@ -1293,13 +1291,10 @@ function showBudgetPostDetails(post) {
                     </button>
                 </div>
             </div>
-            <div class="department-subtitle subtitle-row">
-                <span class="subtitle-left">Endring 2024-2026: <span class="change-badge" style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
-                <span class="subtitle-right">Antall poster: ${post.items.length}</span>
-            </div>
-            <div class="department-subtitle subtitle-row">
-                <span class="subtitle-left">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
-                <span class="subtitle-right"></span>
+            <div class="department-subtitle">
+                <span class="dept-change">Endring 2024-2026: <span class="change-badge" style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
+                <span class="dept-years">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
+                <span class="dept-posts">Antall poster: ${post.items.length}</span>
             </div>
         </div>
         <div class="department-chart">
@@ -1331,6 +1326,9 @@ function showBudgetPostDetails(post) {
     // Render full-size chart
     const chartContainer = card.querySelector(`#post-detail-chart-${post.kap_nr}-${post.post_nr}`);
     createChart(chartContainer, { name: post.post_navn, total2024, total2025, total2026 });
+    
+    // Initialize Lucide icons for the new content
+    initLucideIcons();
     
     // Add back button functionality
     const backButton = document.getElementById('back-button');
@@ -1382,13 +1380,10 @@ function createBudgetPostElement(chapter) {
                     </button>
         </div>
         </div>
-            <div class="department-subtitle subtitle-row">
-                <span class="subtitle-left">Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
-                <span class="subtitle-right">Antall poster: ${postCount}</span>
-            </div>
-            <div class="department-subtitle subtitle-row">
-                <span class="subtitle-left">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
-                <span class="subtitle-right"></span>
+            <div class="department-subtitle">
+                <span class="dept-change">Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
+                <span class="dept-years">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
+                <span class="dept-posts">Antall poster: ${postCount}</span>
             </div>
             </div>
         <div class="department-chart">
