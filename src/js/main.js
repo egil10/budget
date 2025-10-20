@@ -1220,7 +1220,6 @@ function createIndividualBudgetPostElement(post) {
             <div class="department-subtitle">
                 <span class="dept-change">Endring 2024-2026: <span class="change-badge" style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
                 <span class="dept-years">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
-                <span class="dept-posts">Antall poster: ${post.items.length}</span>
             </div>
         </div>
         <div class="department-chart">
@@ -1315,7 +1314,6 @@ function showBudgetPostDetails(post) {
             <div class="department-subtitle">
                 <span class="dept-change">Endring 2024-2026: <span class="change-badge" style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
                 <span class="dept-years">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
-                <span class="dept-posts">Antall poster: ${post.items.length}</span>
             </div>
         </div>
         <div class="department-chart">
