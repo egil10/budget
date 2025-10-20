@@ -1004,9 +1004,9 @@ function createIndividualBudgetPostElement(post) {
         });
     }
 
-    // Enable drill-down to detailed view only when multiple items exist
+    // Enable drill-down to single-card detail view on any post
     const titleEl = postElement.querySelector('.department-title');
-    if (post.items && post.items.length > 1 && titleEl) {
+    if (titleEl) {
         titleEl.classList.add('clickable-title');
         titleEl.addEventListener('click', () => {
             showBudgetPostDetails(post);
@@ -1030,101 +1030,70 @@ function showBudgetPostDetails(post) {
     // Update navigation path to include the budget post
     navigationPath = ['Statsbudsjettet', navigationPath[1] || 'Departement', navigationPath[2] || 'Kapittel', post.post_navn];
     updateHeaderTitle();
-    
+
     // Hide overview, show drill-down
     overviewView.style.display = 'none';
     drillDownView.classList.add('active');
-    
+
     // Update title
-    drillDownTitle.textContent = `${post.post_navn} - Detaljer`;
-    
-    // Show individual budget items within this post
+    drillDownTitle.textContent = `${post.post_navn}`;
+
+    // Show a single card for this post using the same main-style layout
     budgetPostsGrid.innerHTML = '';
-    
-    // Group items by year and show detailed breakdown
-    const itemsByYear = {};
-    post.items.forEach(item => {
-        if (!itemsByYear[item.year]) {
-            itemsByYear[item.year] = [];
-        }
-        itemsByYear[item.year].push(item);
+
+    const totals = {};
+    ['2024', '2025', '2026'].forEach(year => {
+        totals[year] = post.items
+            .filter(item => item.year === parseInt(year))
+            .reduce((sum, item) => sum + (item.beløp || 0), 0);
     });
-    
-    // Calculate totals for all years to create a chart
-    const allYears = ['2024', '2025', '2026'];
-    const yearTotals = {};
-    allYears.forEach(year => {
-        const yearItems = itemsByYear[year] || [];
-        yearTotals[year] = yearItems.reduce((sum, item) => sum + (item.beløp || 0), 0);
-    });
-    
-    // Create a summary card with chart for the post
-    const summaryElement = document.createElement('div');
-    summaryElement.className = 'budget-post-item';
-    
-    const change24to26 = yearTotals['2026'] - yearTotals['2024'];
-    const changePercent = yearTotals['2024'] !== 0 ? ((change24to26 / yearTotals['2024']) * 100).toFixed(1) : '0.0';
-    
-    summaryElement.innerHTML = `
-        <div class="post-header">
-            <h3 class="post-title">${post.post_navn}</h3>
-            <div class="post-amounts">
-                <span class="post-amount">2026: ${formatAmount(yearTotals['2026'])}</span>
-                <span class="post-amount-secondary">2025: ${formatAmount(yearTotals['2025'])}</span>
-                <span class="post-amount-secondary">2024: ${formatAmount(yearTotals['2024'])}</span>
-        </div>
-        </div>
-        <div class="post-details">
-            <p><strong>Post ${post.kap_nr}.${post.post_nr}:</strong> ${post.post_navn}</p>
-            <p><strong>Endring 2024-2026:</strong> 
-                <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">
-                    ${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)
-                </span>
-            </p>
+    const total2024 = totals['2024'] || 0;
+    const total2025 = totals['2025'] || 0;
+    const total2026 = totals['2026'] || 0;
+    const change24to26 = total2026 - total2024;
+    const changePercent = total2024 !== 0 ? ((change24to26 / total2024) * 100).toFixed(1) : '0.0';
+
+    const card = document.createElement('div');
+    card.className = 'budget-post-item';
+    card.innerHTML = `
+        <div class="department-header">
+            <div class="department-header-top">
+                <h2 class="department-title">${post.post_navn}</h2>
+                <div class="department-actions">
+                    <button class="post-copy" title="Kopier data" aria-label="Kopier data">
+                        <i data-lucide="clipboard"></i>
+                    </button>
+                    <button class="post-download" title="Last ned" aria-label="Last ned">
+                        <i data-lucide="download"></i>
+                    </button>
+                </div>
             </div>
-        <div class="post-chart" id="post-chart-${post.kap_nr}-${post.post_nr}"></div>
-    `;
-    
-    // Create chart for the post
-    const chartContainer = summaryElement.querySelector(`#post-chart-${post.kap_nr}-${post.post_nr}`);
-    createMiniChart(chartContainer, yearTotals['2024'], yearTotals['2025'], yearTotals['2026'], post.post_navn);
-    
-    budgetPostsGrid.appendChild(summaryElement);
-    
-    // Create detailed breakdown by year
-    Object.keys(itemsByYear).sort().forEach(year => {
-        const yearItems = itemsByYear[year];
-        
-        const yearElement = document.createElement('div');
-        yearElement.className = 'budget-post-item year-breakdown';
-        
-        const yearTotal = yearItems.reduce((sum, item) => sum + (item.beløp || 0), 0);
-        
-        yearElement.innerHTML = `
-            <div class="post-header">
-                <h3 class="post-title">${year} - Detaljer</h3>
-                <span class="post-amount">${formatAmount(yearTotal)}</span>
-                </div>
-            <div class="post-details">
-                <p><strong>Antall poster:</strong> ${yearItems.length}</p>
+            <div class="department-subtitle subtitle-row">
+                <span class="subtitle-left">Endring 2024-2026: <span class="change-badge" style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
+                <span class="subtitle-right">Antall poster: ${post.items.length}</span>
+            </div>
+            <div class="department-subtitle subtitle-row">
+                <span class="subtitle-left">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
+                <span class="subtitle-right"></span>
+            </div>
+        </div>
+        <div class="department-chart">
+            <div class="chart-container" id="post-detail-chart-${post.kap_nr}-${post.post_nr}"></div>
         </div>
     `;
-    
-        // Add individual items
-        yearItems.forEach(item => {
-            const itemElement = document.createElement('div');
-            itemElement.className = 'budget-item-detail';
-            itemElement.innerHTML = `
-                <div class="detail-row">
-                    <span class="detail-label">${item.stikkord || 'Ingen stikkord'}</span>
-                    <span class="detail-amount">${formatAmount(item.beløp)}</span>
-                </div>
-            `;
-            yearElement.appendChild(itemElement);
-        });
-        
-        budgetPostsGrid.appendChild(yearElement);
-    });
+
+    budgetPostsGrid.appendChild(card);
+
+    // Hook actions
+    const copyBtn = card.querySelector('.post-copy');
+    const downloadBtn = card.querySelector('.post-download');
+    const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
+    if (copyBtn) copyBtn.addEventListener('click', () => withIconFeedback(copyBtn, 'clipboard', () => copyChartData(deptLike)));
+    if (downloadBtn) downloadBtn.addEventListener('click', () => withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(deptLike)));
+
+    // Render full-size chart
+    const chartContainer = card.querySelector(`#post-detail-chart-${post.kap_nr}-${post.post_nr}`);
+    createChart(chartContainer, { name: post.post_navn, total2024, total2025, total2026 });
     
     // Add back button functionality
     const backButton = document.getElementById('back-button');
