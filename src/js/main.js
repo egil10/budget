@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Ensure icons are rendered for initial buttons
     setTimeout(() => initLucideIcons(), 0);
     initDrillDown();
+    initMobileFilter();
     initResponsiveHandlers();
     hideLoadingScreen();
 });
@@ -279,6 +280,9 @@ function updateHeaderTitle() {
         if (drillUpButton) {
             drillUpButton.style.display = navigationPath.length > 1 ? 'flex' : 'none';
         }
+
+        // Keep mobile filter in sync with current path
+        syncMobileFilterWithPath();
     }
 }
 
@@ -326,7 +330,8 @@ function getChapterByName(departmentName, chapterName) {
 
 function handleBreadcrumbClick(index) {
     if (index === 0) {
-        showOverview();
+        // Hard refresh to load the main page
+        window.location.reload();
         return;
     }
     if (index === 1) {
@@ -374,8 +379,84 @@ function initResponsiveHandlers() {
             if (budgetData.combined.length > 0) {
                 renderDepartmentCharts();
             }
+            updateMobileFilterVisibility();
+            syncMobileFilterWithPath();
         }, 250);
     });
+}
+
+// --- Mobile native filter ---
+let mobileFilterSelect = null;
+
+function initMobileFilter() {
+    const headerContainer = document.querySelector('.header-container');
+    if (!headerContainer) return;
+    // Avoid duplicates
+    mobileFilterSelect = document.getElementById('mobile-dept-select');
+    if (!mobileFilterSelect) {
+        mobileFilterSelect = document.createElement('select');
+        mobileFilterSelect.id = 'mobile-dept-select';
+        mobileFilterSelect.className = 'mobile-filter';
+        headerContainer.appendChild(mobileFilterSelect);
+    }
+    populateMobileFilter();
+    updateMobileFilterVisibility();
+    syncMobileFilterWithPath();
+    mobileFilterSelect.addEventListener('change', () => {
+        const value = mobileFilterSelect.value;
+        if (value) {
+            showDrillDown(value);
+            // Close nav if open
+            if (navMenu && navMenu.classList.contains('active')) {
+                navMenu.classList.remove('active');
+                document.body.classList.remove('nav-open');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+}
+
+function populateMobileFilter() {
+    if (!mobileFilterSelect) return;
+    const departments = getUniqueDepartments();
+    const currentValue = mobileFilterSelect.value;
+    const frag = document.createDocumentFragment();
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Velg departement…';
+    frag.appendChild(placeholder);
+
+    departments.forEach((dept) => {
+        const opt = document.createElement('option');
+        opt.value = dept;
+        opt.textContent = dept;
+        frag.appendChild(opt);
+    });
+
+    mobileFilterSelect.innerHTML = '';
+    mobileFilterSelect.appendChild(frag);
+    if (currentValue) mobileFilterSelect.value = currentValue;
+}
+
+function updateMobileFilterVisibility() {
+    if (!mobileFilterSelect) return;
+    const isMobile = window.innerWidth <= 768;
+    mobileFilterSelect.style.display = isMobile ? 'block' : 'none';
+}
+
+function syncMobileFilterWithPath() {
+    if (!mobileFilterSelect) return;
+    const departmentName = navigationPath[1];
+    if (departmentName) {
+        if (mobileFilterSelect.value !== departmentName) {
+            mobileFilterSelect.value = departmentName;
+        }
+    } else {
+        if (mobileFilterSelect.value !== '') {
+            mobileFilterSelect.value = '';
+        }
+    }
 }
 
 // Drill up one level

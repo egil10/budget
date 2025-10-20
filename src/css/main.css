@@ -127,19 +127,15 @@ body {
     align-items: center;
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+/* Prevent header content from causing horizontal overflow */
+.main-header {
+    overflow: hidden;
 }
 
 .site-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    text-decoration: none;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .site-title:hover {
@@ -873,20 +869,19 @@ body.nav-open {
     .header-actions {
         gap: 0.25rem;
     }
-    
-    .drill-up-button,
-    .nav-toggle,
-    .theme-toggle {
-        padding: 0.4rem;
+
+    /* Native mobile filter */
+    .mobile-filter {
+        width: 100%;
+        margin-top: 0.25rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-family: var(--font-family);
     }
-    
-    .drill-up-button i,
-    .nav-toggle i,
-    .theme-toggle i {
-        width: 18px;
-        height: 18px;
-    }
-    
+
     /* Breadcrumb mobile adjustments */
     .site-title .breadcrumb-item {
         font-size: 1rem;
@@ -899,6 +894,24 @@ body.nav-open {
     .site-title .breadcrumb-separator {
         font-size: 0.875rem;
         margin: 0 0.25rem;
+    }
+
+    /* Keep header from overflowing horizontally */
+    .main-header {
+        overflow: hidden;
+    }
+    
+    .drill-up-button,
+    .nav-toggle,
+    .theme-toggle {
+        padding: 0.4rem;
+    }
+    
+    .drill-up-button i,
+    .nav-toggle i,
+    .theme-toggle i {
+        width: 18px;
+        height: 18px;
     }
     
     /* Navigation menu mobile */
