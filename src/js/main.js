@@ -917,20 +917,33 @@ function createChart(container, dept) {
     // Create gradient definition
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-    gradient.setAttribute('id', 'chartGradient');
+    const gradientId = `chartGradient-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    gradient.setAttribute('id', gradientId);
     gradient.setAttribute('x1', '0%');
     gradient.setAttribute('y1', '0%');
     gradient.setAttribute('x2', '0%');
     gradient.setAttribute('y2', '100%');
 
+    // Determine chart color based on navigation level
+    let chartColor = '#0083ff'; // Default color
+    
+    if (navigationPath.length === 1) {
+        // Level 0: Use consistent color for all department charts
+        chartColor = '#0083ff';
+    } else if (navigationPath.length >= 2) {
+        // Level 1,2,3: Use the department color from navigation path
+        const departmentName = navigationPath[1];
+        chartColor = DEPARTMENT_COLORS[departmentName] || '#0083ff';
+    }
+
     const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
     stop1.setAttribute('offset', '0.4');
-    stop1.setAttribute('stop-color', DEPARTMENT_COLORS[dept.name] || '#0083ff');
+    stop1.setAttribute('stop-color', chartColor);
     stop1.setAttribute('stop-opacity', '1');
 
     const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
     stop2.setAttribute('offset', '0.8');
-    stop2.setAttribute('stop-color', DEPARTMENT_COLORS[dept.name] || '#0083ff');
+    stop2.setAttribute('stop-color', chartColor);
     stop2.setAttribute('stop-opacity', '0');
 
     gradient.appendChild(stop1);
@@ -976,6 +989,8 @@ function createChart(container, dept) {
     areaD += ` L ${xScale(years.length - 1)} ${height - margin.bottom} Z`;
     areaPath.setAttribute('d', areaD);
     areaPath.classList.add('chart-area');
+    areaPath.style.fill = `url(#${gradientId})`;
+    areaPath.style.fillOpacity = '0.3';
     svg.appendChild(areaPath);
 
     // Create line path
@@ -986,6 +1001,8 @@ function createChart(container, dept) {
     }
     linePath.setAttribute('d', lineD);
     linePath.classList.add('chart-line');
+    linePath.style.stroke = chartColor;
+    linePath.style.strokeWidth = '2';
     svg.appendChild(linePath);
 
     // Create data points
@@ -994,6 +1011,10 @@ function createChart(container, dept) {
         point.setAttribute('cx', xScale(index));
         point.setAttribute('cy', yScale(amounts[index]));
         point.classList.add('chart-point');
+        point.style.fill = chartColor;
+        point.style.stroke = 'var(--bg-primary)';
+        point.style.strokeWidth = '2';
+        point.setAttribute('r', '4');
         svg.appendChild(point);
     });
 
