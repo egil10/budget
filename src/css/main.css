@@ -267,6 +267,23 @@ body {
     font-weight: 400;
 }
 
+.subtitle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.subtitle-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.subtitle-right {
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
 /* Chart card actions aligned to right */
 .department-actions {
     margin-left: auto;

@@ -293,13 +293,8 @@ function updateHeaderTitle() {
 function initSiteTitle() {
     if (siteTitle) {
         siteTitle.addEventListener('click', () => {
-            if (navigationPath.length > 1) {
-                // If in drill-down, go back to main view
-                showOverview();
-            } else {
-                // If already at main view, refresh the page
-                window.location.reload();
-            }
+            // Always hard refresh when clicking the header title
+            window.location.reload();
         });
     }
 }
@@ -592,8 +587,8 @@ function createDepartmentChartBlock(dept) {
                     <button class="chart-download" title="Last ned" aria-label="Last ned">
                         <i data-lucide="download"></i>
                     </button>
-                </div>
-            </div>
+        </div>
+        </div>
             <p class="department-subtitle">Budsjett</p>
         </div>
         <div class="department-chart">
@@ -601,11 +596,13 @@ function createDepartmentChartBlock(dept) {
         </div>
     `;
     
-    // Add click event to title for drill-down
+    // Add click event to title for drill-down (disabled for Totalt statsbudsjett)
     const titleElement = block.querySelector('.department-title');
-    titleElement.addEventListener('click', () => {
-        showDrillDown(dept.name);
-    });
+    if (dept.name !== 'Totalt statsbudsjett') {
+        titleElement.addEventListener('click', () => {
+            showDrillDown(dept.name);
+        });
+    }
     
     // Create the chart
     const chartContainer = block.querySelector('.chart-container');
@@ -824,13 +821,10 @@ function createChart(container, dept) {
 
 // Drill-down functionality
 function initDrillDown() {
-    const backButton = document.getElementById('back-button');
     const overviewView = document.getElementById('overview-view');
     const drillDownView = document.getElementById('drill-down-view');
     
-    backButton.addEventListener('click', () => {
-        showOverview();
-    });
+    // Inline back button removed; header back handles navigation
 }
 
 function showDrillDown(departmentName) {
@@ -979,8 +973,14 @@ function createIndividualBudgetPostElement(post) {
                     </button>
                 </div>
             </div>
-            <p class="department-subtitle">Antall poster: ${post.items.length} · Endring 2024-2026: <span style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></p>
-            <p class="department-subtitle">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</p>
+            <div class="department-subtitle subtitle-row">
+                <span class="subtitle-left">Endring 2024-2026: <span class="change-badge" style="color:${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
+                <span class="subtitle-right">Antall poster: ${post.items.length}</span>
+            </div>
+            <div class="department-subtitle subtitle-row">
+                <span class="subtitle-left">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
+                <span class="subtitle-right"></span>
+            </div>
         </div>
         <div class="department-chart">
             <div class="chart-container" id="post-chart-${post.kap_nr}-${post.post_nr}"></div>
@@ -1001,6 +1001,15 @@ function createIndividualBudgetPostElement(post) {
         downloadBtn.addEventListener('click', () => {
             const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
             withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(deptLike));
+        });
+    }
+
+    // Enable drill-down to detailed view only when multiple items exist
+    const titleEl = postElement.querySelector('.department-title');
+    if (post.items && post.items.length > 1 && titleEl) {
+        titleEl.classList.add('clickable-title');
+        titleEl.addEventListener('click', () => {
+            showBudgetPostDetails(post);
         });
     }
 
@@ -1165,16 +1174,17 @@ function createBudgetPostElement(chapter) {
                     <button class="chapter-download" title="Last ned" aria-label="Last ned">
                         <i data-lucide="download"></i>
                     </button>
-                </div>
-            </div>
-            <p class="department-subtitle">Antall poster: ${postCount} · Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></p>
-            <p class="department-subtitle">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</p>
         </div>
+        </div>
+            <p class="department-subtitle">Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></p>
+            <p class="department-subtitle">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</p>
+            <p class="department-subtitle">Antall poster: ${postCount}</p>
+            </div>
         <div class="department-chart">
             <div class="chart-container" id="post-chart-${chapter.kap_navn.replace(/[^a-zA-Z0-9]/g, '-')}"></div>
         </div>
     `;
-
+    
     // Add click event to title for deeper drill-down
     const titleElement = postElement.querySelector('.department-title');
     titleElement.addEventListener('click', () => {
