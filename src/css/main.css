@@ -733,6 +733,12 @@ body {
     left: 0;
 }
 
+/* Prevent background scroll when the mobile nav is open */
+body.nav-open {
+    overflow: hidden;
+    height: 100vh;
+}
+
 .nav-menu-wrapper {
     height: 100%;
     display: flex;
@@ -898,6 +904,20 @@ body {
     
     .nav-menu.active {
         left: 0;
+    }
+
+    /* Lock scroll on body when nav is open (extra safety on mobile) */
+    body.nav-open {
+        position: fixed;
+        width: 100%;
+        inset: 0;
+    }
+
+    /* Respect iOS safe area for the sticky header */
+    @supports (padding-top: env(safe-area-inset-top)) {
+        .main-header {
+            padding-top: calc(1rem + env(safe-area-inset-top));
+        }
     }
     
     .nav-menu-header {

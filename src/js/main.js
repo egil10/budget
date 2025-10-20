@@ -392,16 +392,19 @@ function initNavigation() {
     // Toggle navigation menu
     navToggle.addEventListener('click', () => {
         navMenu.classList.add('active');
+        document.body.classList.add('nav-open');
     });
     
     navClose.addEventListener('click', () => {
         navMenu.classList.remove('active');
+        document.body.classList.remove('nav-open');
     });
     
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
         if (!navMenu.contains(e.target) && !navToggle.contains(e.target)) {
             navMenu.classList.remove('active');
+            document.body.classList.remove('nav-open');
         }
     });
     
@@ -409,6 +412,7 @@ function initNavigation() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             navMenu.classList.remove('active');
+            document.body.classList.remove('nav-open');
         }
     });
     
