@@ -127,9 +127,18 @@ body {
     align-items: center;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0; /* prevent shrinking */
+}
+
 /* Prevent header content from causing horizontal overflow */
 .main-header {
     overflow: hidden;
+    max-height: 120px; /* limit header height */
+    transition: max-height 0.3s ease;
 }
 
 .site-title {
@@ -162,6 +171,28 @@ body {
 .site-title .breadcrumb-item:first-child {
     font-size: 1.875rem;
     color: var(--text-primary);
+}
+
+/* Desktop breadcrumb wrapping for long paths */
+@media (min-width: 769px) {
+    .site-title {
+        white-space: normal; /* allow wrapping on desktop too */
+        line-height: 1.3;
+    }
+    
+    .site-title .breadcrumb-item {
+        display: inline; /* keep inline for better wrapping */
+    }
+    
+    .site-title .breadcrumb-separator {
+        display: inline; /* keep separators visible */
+    }
+
+    /* Create hanging indent effect - continuation lines align under arrow */
+    .site-title {
+        text-indent: -1.5rem; /* negative indent for hanging effect */
+        padding-left: 1.5rem; /* positive padding to offset */
+    }
 }
 
 .drill-up-button,
@@ -866,6 +897,9 @@ body.nav-open {
         min-width: 0;
         white-space: normal; /* allow wrapping */
         line-height: 1.3;
+        max-height: 80px; /* limit breadcrumb height */
+        overflow-y: auto; /* scroll if too many lines */
+        overflow-x: hidden;
     }
     
     .header-actions {

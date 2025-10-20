@@ -26,40 +26,94 @@ function copyChartData(dept) {
 
 // Download CSV of the chart data
 function downloadChartCSV(dept) {
-    const rows = [
-        ['date', 'value', 'index'],
-        ['2024-01-01', String(dept.total2024), '1'],
-        ['2025-01-01', String(dept.total2025), '2'],
-        ['2026-01-01', String(dept.total2026), '3']
-    ];
-    const csv = rows.map(r => r.map(v => /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${dept.name.replace(/\s+/g, '_')}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    return new Promise((resolve) => {
+        const rows = [
+            ['date', 'value', 'index'],
+            ['2024-01-01', String(dept.total2024), '1'],
+            ['2025-01-01', String(dept.total2025), '2'],
+            ['2026-01-01', String(dept.total2026), '3']
+        ];
+        const csv = rows.map(r => r.map(v => /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${dept.name.replace(/\s+/g, '_')}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        resolve();
+    });
 }
 
 // Utility: temporary icon feedback
 function setButtonIcon(buttonEl, iconName) {
     const i = buttonEl.querySelector('i');
-    if (!i) return;
+    if (!i) {
+        console.log('No icon found in button');
+        return;
+    }
+    console.log('Setting icon to:', iconName);
     i.setAttribute('data-lucide', iconName);
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+        console.log('Lucide icons re-rendered');
+    } else {
+        console.log('Lucide not available');
+    }
 }
 
 function withIconFeedback(buttonEl, baselineIcon, actionPromise) {
+    console.log('withIconFeedback called', { baselineIcon, actionPromise });
     const run = () => {
-        Promise.resolve(actionPromise && actionPromise()).then(() => {
+        console.log('Running action...');
+        Promise.resolve(actionPromise).then(() => {
+            console.log('Action succeeded, showing check icon');
+            
+            // Try to change icon
             setButtonIcon(buttonEl, 'check');
-            setTimeout(() => setButtonIcon(buttonEl, baselineIcon), 1200);
-        }).catch(() => {
+            
+            // Add visual feedback with color change and scale
+            const icon = buttonEl.querySelector('i');
+            if (icon) {
+                console.log('Found icon, applying styles');
+                icon.style.color = 'var(--accent-success)';
+                icon.style.transform = 'scale(1.1)';
+                icon.style.transition = 'all 0.2s ease';
+                
+                // Force a re-render
+                icon.style.display = 'none';
+                icon.offsetHeight; // trigger reflow
+                icon.style.display = '';
+            } else {
+                console.log('No icon found for styling');
+            }
+            
+            setTimeout(() => {
+                console.log('Reverting to baseline icon');
+                setButtonIcon(buttonEl, baselineIcon);
+                if (icon) {
+                    icon.style.color = '';
+                    icon.style.transform = '';
+                }
+            }, 1000);
+        }).catch((error) => {
+            console.log('Action failed:', error);
             // brief error feedback (revert to baseline)
-            setTimeout(() => setButtonIcon(buttonEl, baselineIcon), 800);
+            const icon = buttonEl.querySelector('i');
+            if (icon) {
+                icon.style.color = 'var(--accent-danger)';
+                icon.style.transform = 'scale(0.9)';
+                icon.style.transition = 'all 0.2s ease';
+            }
+            setTimeout(() => {
+                setButtonIcon(buttonEl, baselineIcon);
+                if (icon) {
+                    icon.style.color = '';
+                    icon.style.transform = '';
+                }
+            }, 800);
         });
     };
     // ensure baseline icon first
@@ -754,12 +808,12 @@ function createDepartmentChartBlock(dept) {
     const downloadBtn = block.querySelector('.chart-download');
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
-            withIconFeedback(copyBtn, 'clipboard', () => copyChartData(dept));
+            withIconFeedback(copyBtn, 'clipboard', copyChartData(dept));
         });
     }
     if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
-            withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(dept));
+            withIconFeedback(downloadBtn, 'download', downloadChartCSV(dept));
         });
     }
 
@@ -1135,13 +1189,13 @@ function createIndividualBudgetPostElement(post) {
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
             const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
-            withIconFeedback(copyBtn, 'clipboard', () => copyChartData(deptLike));
+            withIconFeedback(copyBtn, 'clipboard', copyChartData(deptLike));
         });
     }
     if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
             const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
-            withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(deptLike));
+            withIconFeedback(downloadBtn, 'download', downloadChartCSV(deptLike));
         });
     }
 
@@ -1229,8 +1283,8 @@ function showBudgetPostDetails(post) {
     const copyBtn = card.querySelector('.post-copy');
     const downloadBtn = card.querySelector('.post-download');
     const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
-    if (copyBtn) copyBtn.addEventListener('click', () => withIconFeedback(copyBtn, 'clipboard', () => copyChartData(deptLike)));
-    if (downloadBtn) downloadBtn.addEventListener('click', () => withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(deptLike)));
+    if (copyBtn) copyBtn.addEventListener('click', () => withIconFeedback(copyBtn, 'clipboard', copyChartData(deptLike)));
+    if (downloadBtn) downloadBtn.addEventListener('click', () => withIconFeedback(downloadBtn, 'download', downloadChartCSV(deptLike)));
 
     // Render full-size chart
     const chartContainer = card.querySelector(`#post-detail-chart-${post.kap_nr}-${post.post_nr}`);
@@ -1316,12 +1370,12 @@ function createBudgetPostElement(chapter) {
     const downloadBtn = postElement.querySelector('.chapter-download');
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
-            withIconFeedback(copyBtn, 'clipboard', () => copyChartData(deptLike));
+            withIconFeedback(copyBtn, 'clipboard', copyChartData(deptLike));
         });
     }
     if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
-            withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(deptLike));
+            withIconFeedback(downloadBtn, 'download', downloadChartCSV(deptLike));
         });
     }
     
