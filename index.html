@@ -11,9 +11,17 @@
 </head>
 <body>
     <div id="loading-screen">
+        <!-- Minimal Background -->
+        <svg class="background-chart" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+            <path class="minimal-line" d="M 20 80 Q 50 20 80 80" stroke="#0083ff" stroke-width="0.4" fill="none" stroke-linecap="round">
+                <animate attributeName="stroke-dasharray" values="0,100;100,0" dur="2s" repeatCount="indefinite"/>
+            </path>
+        </svg>
+
         <div class="loading-content">
-            <h1>Statsbudsjettet</h1>
-            <p>Laster budsjettdata...</p>
+            <div class="loading-header">
+                <h1>Statsbudsjettet</h1>
+            </div>
         </div>
     </div>
 

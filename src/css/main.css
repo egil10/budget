@@ -78,18 +78,86 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--bg-primary);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, #f8fafc 100%);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     z-index: 1000;
     transition: opacity 0.5s ease;
+    overflow: hidden;
 }
 
 #loading-screen.hidden {
     opacity: 0;
     visibility: hidden;
+}
+
+/* Full Background Circular Line Chart Loading Screen */
+.background-chart {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.1;
+}
+
+.loading-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 300px;
+    padding: 1rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.loading-header h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    color: #000;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    animation: titleFloat 2s ease-in-out infinite;
+}
+
+.minimal-line {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    filter: none;
+    animation: lineDraw 2s ease-in-out infinite;
+}
+
+/* Minimal Animations */
+@keyframes lineDraw {
+    0% { 
+        stroke-dashoffset: 100; 
+        opacity: 0.6;
+    }
+    50% { 
+        stroke-dashoffset: 0; 
+        opacity: 1;
+    }
+    100% { 
+        stroke-dashoffset: -100; 
+        opacity: 0.6;
+    }
+}
+
+@keyframes titleFloat {
+    0%, 100% { 
+        transform: translateY(0) scale(1); 
+        opacity: 1;
+    }
+    50% { 
+        transform: translateY(-2px) scale(1.01); 
+        opacity: 0.9;
+    }
 }
 
 .loading-content {

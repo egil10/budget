@@ -206,7 +206,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDrillDown();
     initMobileFilter();
     initResponsiveHandlers();
-    hideLoadingScreen();
+    // Show brief minimal loading screen
+    setTimeout(() => {
+        hideLoadingScreen();
+    }, 800); // 0.8 seconds of brief loading
 });
 
 // Data loading and processing
