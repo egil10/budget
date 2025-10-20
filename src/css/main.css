@@ -306,10 +306,6 @@ body {
     gap: 1rem;
 }
 
-.subtitle-left {
-    flex: 1;
-    min-width: 0;
-}
 
 .subtitle-right {
     white-space: nowrap;

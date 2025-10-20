@@ -1283,8 +1283,20 @@ function showBudgetPostDetails(post) {
     const copyBtn = card.querySelector('.post-copy');
     const downloadBtn = card.querySelector('.post-download');
     const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
-    if (copyBtn) copyBtn.addEventListener('click', () => withIconFeedback(copyBtn, 'clipboard', copyChartData(deptLike)));
-    if (downloadBtn) downloadBtn.addEventListener('click', () => withIconFeedback(downloadBtn, 'download', downloadChartCSV(deptLike)));
+    console.log('Post detail buttons found:', { copyBtn: !!copyBtn, downloadBtn: !!downloadBtn });
+    console.log('Button elements:', { copyBtn, downloadBtn });
+    if (copyBtn) {
+        console.log('Copy button found, adding event listener');
+        copyBtn.addEventListener('click', () => withIconFeedback(copyBtn, 'clipboard', copyChartData(deptLike)));
+    } else {
+        console.log('Copy button NOT found!');
+    }
+    if (downloadBtn) {
+        console.log('Download button found, adding event listener');
+        downloadBtn.addEventListener('click', () => withIconFeedback(downloadBtn, 'download', downloadChartCSV(deptLike)));
+    } else {
+        console.log('Download button NOT found!');
+    }
 
     // Render full-size chart
     const chartContainer = card.querySelector(`#post-detail-chart-${post.kap_nr}-${post.post_nr}`);
