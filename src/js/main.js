@@ -1176,9 +1176,14 @@ function createBudgetPostElement(chapter) {
                     </button>
         </div>
         </div>
-            <p class="department-subtitle">Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></p>
-            <p class="department-subtitle">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</p>
-            <p class="department-subtitle">Antall poster: ${postCount}</p>
+            <div class="department-subtitle subtitle-row">
+                <span class="subtitle-left">Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></span>
+                <span class="subtitle-right">Antall poster: ${postCount}</span>
+            </div>
+            <div class="department-subtitle subtitle-row">
+                <span class="subtitle-left">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</span>
+                <span class="subtitle-right"></span>
+            </div>
             </div>
         <div class="department-chart">
             <div class="chart-container" id="post-chart-${chapter.kap_navn.replace(/[^a-zA-Z0-9]/g, '-')}"></div>
