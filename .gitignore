@@ -40,3 +40,6 @@ Thumbs.db
 # Logs
 *.log
 
+# Data files - ignore Excel source files (JSON files are needed for the app)
+data/excel/
+
