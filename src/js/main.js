@@ -774,6 +774,18 @@ function createDepartmentChartBlock(dept) {
     block.className = 'department-chart-block';
     block.setAttribute('data-department', dept.name);
 
+    // Get department metadata
+    const deptItems = budgetData.combined.filter(item => 
+        item.fdep_navn && item.fdep_navn.trim() === dept.name
+    );
+    const uniqueChapters = new Set(deptItems.map(item => item.kap_navn)).size;
+    const chapterCount = uniqueChapters;
+    
+    // Calculate change from 2024 to 2026
+    const change24to26 = dept.total2026 - dept.total2024;
+    const changePercent = dept.total2024 !== 0 ? ((change24to26 / dept.total2024) * 100).toFixed(1) : '0.0';
+    const changeText = change24to26 >= 0 ? `+${formatAmount(change24to26)} (+${changePercent}%)` : `${formatAmount(change24to26)} (${changePercent}%)`;
+
     block.innerHTML = `
         <div class="department-header">
             <div class="department-header-top">
@@ -787,7 +799,10 @@ function createDepartmentChartBlock(dept) {
                     </button>
         </div>
         </div>
-            <p class="department-subtitle">Budsjett</p>
+            <div class="department-subtitle">
+                <span class="dept-change">Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${changeText}</span></span>
+                <span class="dept-posts">Antall kapitler: ${chapterCount}</span>
+            </div>
         </div>
         <div class="department-chart">
             <div class="chart-container" id="chart-${dept.name.replace(/\s+/g, '-')}"></div>
@@ -1042,6 +1057,9 @@ function showDrillDown(departmentName) {
     // Update title
     drillDownTitle.textContent = departmentName;
     
+    // Scroll to top when drilling down (instant, no animation)
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    
     // Get department data
     const deptItems = budgetData.combined.filter(item => 
         item.fdep_navn && item.fdep_navn.trim() === departmentName
@@ -1095,6 +1113,9 @@ function showOverview() {
     
     drillDownView.classList.remove('active');
     overviewView.style.display = 'block';
+    
+    // Scroll to top when returning to overview (instant, no animation)
+    window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 function showBudgetChapterDetails(chapter) {
@@ -1113,6 +1134,9 @@ function showBudgetChapterDetails(chapter) {
     
     // Update title
     drillDownTitle.textContent = `${chapter.kap_navn} - Poster`;
+    
+    // Scroll to top when drilling down to chapter details (instant, no animation)
+    window.scrollTo({ top: 0, behavior: 'auto' });
     
     // Show individual posts within this chapter
     budgetPostsGrid.innerHTML = '';
@@ -1235,6 +1259,9 @@ function showBudgetPostDetails(post) {
 
     // Update title
     drillDownTitle.textContent = `${post.post_navn}`;
+    
+    // Scroll to top when drilling down to post details (instant, no animation)
+    window.scrollTo({ top: 0, behavior: 'auto' });
 
     // Show a single card for this post using the same main-style layout
     budgetPostsGrid.innerHTML = '';

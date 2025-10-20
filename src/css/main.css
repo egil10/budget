@@ -373,6 +373,23 @@ body {
     color: var(--text-secondary);
     font-size: 1rem;
     font-weight: 400;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.dept-posts {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: right;
+}
+
+.dept-change {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: left;
 }
 
 .subtitle-row {
@@ -1088,6 +1105,15 @@ body.nav-open {
     
     .department-subtitle {
         font-size: 0.9rem;
+        gap: 0.75rem;
+    }
+    
+    .dept-posts {
+        font-size: 0.75rem;
+    }
+    
+    .dept-change {
+        font-size: 0.75rem;
     }
     
     /* Chart containers mobile */
