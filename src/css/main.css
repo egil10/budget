@@ -69,6 +69,14 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    zoom: 0.9; /* Default to 90% zoom for better desktop experience */
+}
+
+/* Reset zoom for mobile devices */
+@media (max-width: 768px) {
+    body {
+        zoom: 1; /* Full zoom on mobile */
+    }
 }
 
 /* Loading Screen */
