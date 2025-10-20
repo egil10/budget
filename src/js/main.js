@@ -1155,34 +1155,50 @@ function createBudgetPostElement(chapter) {
     const postCount = Object.keys(chapter.posts).length;
     
     postElement.innerHTML = `
-        <div class="post-header">
-            <h3 class="post-title clickable-title">${chapter.kap_navn}</h3>
-            <div class="post-amounts">
-                <span class="post-amount">2026: ${formatAmount(total2026)}</span>
-                <span class="post-amount-secondary">2025: ${formatAmount(total2025)}</span>
-                <span class="post-amount-secondary">2024: ${formatAmount(total2024)}</span>
+        <div class="department-header">
+            <div class="department-header-top">
+                <h2 class="department-title clickable-title">${chapter.kap_navn}</h2>
+                <div class="department-actions">
+                    <button class="chapter-copy" title="Kopier data" aria-label="Kopier data">
+                        <i data-lucide="clipboard"></i>
+                    </button>
+                    <button class="chapter-download" title="Last ned" aria-label="Last ned">
+                        <i data-lucide="download"></i>
+                    </button>
+                </div>
             </div>
+            <p class="department-subtitle">Antall poster: ${postCount} · Endring 2024-2026: <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)</span></p>
+            <p class="department-subtitle">2024: ${formatAmount(total2024)} · 2025: ${formatAmount(total2025)} · 2026: ${formatAmount(total2026)}</p>
         </div>
-        <div class="post-details">
-            <p><strong>Antall poster:</strong> ${postCount}</p>
-            <p><strong>Endring 2024-2026:</strong> 
-                <span style="color: ${change24to26 >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}">
-                    ${change24to26 >= 0 ? '+' : ''}${formatAmount(change24to26)} (${changePercent}%)
-                </span>
-                </p>
-            </div>
-        <div class="post-chart" id="post-chart-${chapter.kap_navn.replace(/[^a-zA-Z0-9]/g, '-')}"></div>
+        <div class="department-chart">
+            <div class="chart-container" id="post-chart-${chapter.kap_navn.replace(/[^a-zA-Z0-9]/g, '-')}"></div>
+        </div>
     `;
-    
+
     // Add click event to title for deeper drill-down
-    const titleElement = postElement.querySelector('.post-title');
+    const titleElement = postElement.querySelector('.department-title');
     titleElement.addEventListener('click', () => {
         showBudgetChapterDetails(chapter);
     });
-    
-    // Create mini chart for this chapter
+
+    // Create full-size chart for this chapter
     const chartContainer = postElement.querySelector(`#post-chart-${chapter.kap_navn.replace(/[^a-zA-Z0-9]/g, '-')}`);
-    createMiniChart(chartContainer, total2024, total2025, total2026, chapter.kap_navn);
+    const deptLike = { name: chapter.kap_navn, total2024, total2025, total2026 };
+    createChart(chartContainer, deptLike);
+
+    // Hook actions
+    const copyBtn = postElement.querySelector('.chapter-copy');
+    const downloadBtn = postElement.querySelector('.chapter-download');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            withIconFeedback(copyBtn, 'clipboard', () => copyChartData(deptLike));
+        });
+    }
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            withIconFeedback(downloadBtn, 'download', () => downloadChartCSV(deptLike));
+        });
+    }
     
     return postElement;
 }
