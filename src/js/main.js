@@ -264,38 +264,94 @@ function initLucideIcons() {
 
 // Update header title with breadcrumbs
 function updateHeaderTitle() {
-    if (siteTitle && navigationPath.length > 1) {
+    if (siteTitle && navigationPath.length > 0) {
         let breadcrumbHTML = '';
         navigationPath.forEach((item, index) => {
             if (index === 0) {
-                breadcrumbHTML += `<span class="breadcrumb-item">${item}</span>`;
+                breadcrumbHTML += `<span class="breadcrumb-item" data-index="${index}">${item}</span>`;
             } else {
-                breadcrumbHTML += `<span class="breadcrumb-separator">→</span><span class="breadcrumb-item">${item}</span>`;
+                breadcrumbHTML += `<span class="breadcrumb-separator">→</span><span class="breadcrumb-item" data-index="${index}">${item}</span>`;
             }
         });
         siteTitle.innerHTML = breadcrumbHTML;
-        
+
         // Show drill-up button when not at main view
         if (drillUpButton) {
-            drillUpButton.style.display = 'flex';
-        }
-    } else if (siteTitle) {
-        siteTitle.innerHTML = 'Statsbudsjettet';
-        
-        // Hide drill-up button at main view
-        if (drillUpButton) {
-            drillUpButton.style.display = 'none';
+            drillUpButton.style.display = navigationPath.length > 1 ? 'flex' : 'none';
         }
     }
 }
 
 // Initialize site title click handler
 function initSiteTitle() {
-    if (siteTitle) {
-        siteTitle.addEventListener('click', () => {
-            // Always hard refresh when clicking the header title
-            window.location.reload();
-        });
+    if (!siteTitle) return;
+    siteTitle.addEventListener('click', (e) => {
+        const crumb = e.target.closest('.breadcrumb-item');
+        if (!crumb) return;
+        const index = parseInt(crumb.getAttribute('data-index') || '-1', 10);
+        if (isNaN(index) || index < 0) return;
+        handleBreadcrumbClick(index);
+    });
+}
+
+function getChapterByName(departmentName, chapterName) {
+    const deptItems = budgetData.combined.filter(item => 
+        item.fdep_navn && item.fdep_navn.trim() === departmentName
+    );
+    const groupedPosts = {};
+    deptItems.forEach(item => {
+        const chapterKey = item.kap_navn;
+        if (!groupedPosts[chapterKey]) {
+            groupedPosts[chapterKey] = {
+                kap_navn: item.kap_navn,
+                items: [],
+                posts: {}
+            };
+        }
+        groupedPosts[chapterKey].items.push(item);
+
+        const postKey = `${item.kap_nr}.${item.post_nr} - ${item.post_navn}`;
+        if (!groupedPosts[chapterKey].posts[postKey]) {
+            groupedPosts[chapterKey].posts[postKey] = {
+                kap_nr: item.kap_nr,
+                post_nr: item.post_nr,
+                post_navn: item.post_navn,
+                items: []
+            };
+        }
+        groupedPosts[chapterKey].posts[postKey].items.push(item);
+    });
+    return groupedPosts[chapterName] || null;
+}
+
+function handleBreadcrumbClick(index) {
+    if (index === 0) {
+        showOverview();
+        return;
+    }
+    if (index === 1) {
+        const departmentName = navigationPath[1];
+        if (departmentName) showDrillDown(departmentName);
+        return;
+    }
+    if (index === 2) {
+        const departmentName = navigationPath[1];
+        const chapterName = navigationPath[2];
+        if (!departmentName || !chapterName) return;
+        const chapter = getChapterByName(departmentName, chapterName);
+        if (chapter) showBudgetChapterDetails(chapter);
+        return;
+    }
+    if (index === 3) {
+        const departmentName = navigationPath[1];
+        const chapterName = navigationPath[2];
+        const postName = navigationPath[3];
+        if (!departmentName || !chapterName || !postName) return;
+        const chapter = getChapterByName(departmentName, chapterName);
+        if (!chapter) return;
+        const post = Object.values(chapter.posts).find(p => p.post_navn === postName);
+        if (post) showBudgetPostDetails(post);
+        return;
     }
 }
 
