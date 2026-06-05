@@ -1,7 +1,6 @@
 /* Statsbudsjettet - Clean Chart Layout */
-
-/* Import Grotesk font */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+/* Note: the Space Grotesk font is loaded via a <link> in index.html, so no @import
+   is needed here (a CSS @import would block rendering on a second round-trip). */
 
 /* CSS Variables */
 :root {
@@ -340,6 +339,15 @@ body {
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     border: 1px solid var(--border-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    /* Promote charts to their own layer so re-paints on hover/scroll stay cheap */
+    content-visibility: auto;
+    contain-intrinsic-size: 480px;
+}
+
+.department-chart-block:hover {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
 }
 
 .department-header {
@@ -1298,4 +1306,47 @@ body.nav-open {
 /* Utility classes */
 .hidden {
     display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility & polish
+   --------------------------------------------------------------------------- */
+
+/* Visible keyboard focus ring for all interactive elements (mouse clicks stay clean) */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+.breadcrumb-item:focus-visible,
+.department-title:focus-visible,
+.clickable-title:focus-visible,
+.nav-menu-item:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Smooth, consistent in-page anchored scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Respect users who prefer reduced motion: kill the looping loader/title animations
+   and any smooth scrolling so nothing moves unexpectedly. */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+
+    .minimal-line,
+    .loading-header h1 {
+        animation: none !important;
+    }
 }

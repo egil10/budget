@@ -2,12 +2,21 @@
 <html lang="no">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interaktiv visualisering av det norske statsbudsjettet (2024–2026) basert på Gul Bok. Utforsk departementer, kapitler og poster.">
+    <meta name="theme-color" content="#ffffff">
     <title>Statsbudsjettet</title>
     <link rel="icon" type="image/x-icon" href="./src/assets/favicon.ico">
-    <link rel="stylesheet" href="./src/css/main.css?v=2">
+
+    <!-- Preconnect to font + CDN origins so the critical resources start downloading sooner -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+
+    <link rel="stylesheet" href="./src/css/main.css?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Pinned + minified Lucide build: immutable 1-year cache, deferred so it never blocks parsing -->
+    <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js" defer></script>
 </head>
 <body>
     <div id="loading-screen">
@@ -168,6 +177,6 @@
         </footer>
     </div>
 
-    <script src="./src/js/main.js?v=2"></script>
+    <script src="./src/js/main.js?v=3" defer></script>
 </body>
 </html>

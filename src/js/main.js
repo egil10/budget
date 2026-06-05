@@ -50,79 +50,50 @@ function downloadChartCSV(dept) {
 // Utility: temporary icon feedback
 function setButtonIcon(buttonEl, iconName) {
     const i = buttonEl.querySelector('i');
-    if (!i) {
-        console.log('No icon found in button');
-        return;
-    }
-    console.log('Setting icon to:', iconName);
+    if (!i) return;
     i.setAttribute('data-lucide', iconName);
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
-        console.log('Lucide icons re-rendered');
-    } else {
-        console.log('Lucide not available');
     }
 }
 
 function withIconFeedback(buttonEl, baselineIcon, actionPromise) {
-    console.log('withIconFeedback called', { baselineIcon, actionPromise });
-    const run = () => {
-        console.log('Running action...');
-        Promise.resolve(actionPromise).then(() => {
-            console.log('Action succeeded, showing check icon');
-            
-            // Try to change icon
-            setButtonIcon(buttonEl, 'check');
-            
-            // Add visual feedback with color change and scale
-            const icon = buttonEl.querySelector('i');
+    Promise.resolve(actionPromise).then(() => {
+        // Swap to a success checkmark with a brief pop
+        setButtonIcon(buttonEl, 'check');
+        const icon = buttonEl.querySelector('i');
+        if (icon) {
+            icon.style.color = 'var(--accent-success)';
+            icon.style.transform = 'scale(1.1)';
+            icon.style.transition = 'all 0.2s ease';
+        }
+        setTimeout(() => {
+            setButtonIcon(buttonEl, baselineIcon);
             if (icon) {
-                console.log('Found icon, applying styles');
-                icon.style.color = 'var(--accent-success)';
-                icon.style.transform = 'scale(1.1)';
-                icon.style.transition = 'all 0.2s ease';
-                
-                // Force a re-render
-                icon.style.display = 'none';
-                icon.offsetHeight; // trigger reflow
-                icon.style.display = '';
-            } else {
-                console.log('No icon found for styling');
+                icon.style.color = '';
+                icon.style.transform = '';
             }
-            
-            setTimeout(() => {
-                console.log('Reverting to baseline icon');
-                setButtonIcon(buttonEl, baselineIcon);
-                if (icon) {
-                    icon.style.color = '';
-                    icon.style.transform = '';
-                }
-            }, 1000);
-        }).catch((error) => {
-            console.log('Action failed:', error);
-            // brief error feedback (revert to baseline)
-            const icon = buttonEl.querySelector('i');
+        }, 1000);
+    }).catch(() => {
+        // Brief error feedback, then revert to baseline
+        const icon = buttonEl.querySelector('i');
+        if (icon) {
+            icon.style.color = 'var(--accent-danger)';
+            icon.style.transform = 'scale(0.9)';
+            icon.style.transition = 'all 0.2s ease';
+        }
+        setTimeout(() => {
+            setButtonIcon(buttonEl, baselineIcon);
             if (icon) {
-                icon.style.color = 'var(--accent-danger)';
-                icon.style.transform = 'scale(0.9)';
-                icon.style.transition = 'all 0.2s ease';
+                icon.style.color = '';
+                icon.style.transform = '';
             }
-            setTimeout(() => {
-                setButtonIcon(buttonEl, baselineIcon);
-                if (icon) {
-                    icon.style.color = '';
-                    icon.style.transform = '';
-                }
-            }, 800);
-        });
-    };
+        }, 800);
+    });
     // ensure baseline icon first
     setButtonIcon(buttonEl, baselineIcon);
-    run();
 }
 // Statsbudsjettet - Simple Chart Layout
-
-console.log('Statsbudsjettet loading...');
 
 // Configuration and utility functions
 const DEPARTMENT_COLORS = {
@@ -173,6 +144,28 @@ let budgetData = {
     combined: []
 };
 
+// Derived caches (built once after data loads) to avoid repeated O(n) scans of
+// `budgetData.combined`. Without these, every render/resize re-filtered the full
+// ~30k-row dataset once per department, which is the dominant cost on this page.
+let departmentIndex = new Map();   // department name -> array of its items
+let departmentStatsCache = null;   // sorted stats array, memoised
+let uniqueDepartmentsCache = null; // sorted unique department names
+
+function buildDerivedCaches() {
+    departmentIndex = new Map();
+    budgetData.combined.forEach(item => {
+        const name = item.fdep_navn ? item.fdep_navn.trim() : 'Unknown';
+        let bucket = departmentIndex.get(name);
+        if (!bucket) {
+            bucket = [];
+            departmentIndex.set(name, bucket);
+        }
+        bucket.push(item);
+    });
+    uniqueDepartmentsCache = Array.from(departmentIndex.keys()).sort();
+    departmentStatsCache = null; // recomputed lazily on next getDepartmentStats()
+}
+
 // Navigation state
 let navigationPath = ['Statsbudsjettet'];
 
@@ -192,7 +185,6 @@ const drillUpButton = document.getElementById('drill-up-button');
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOM loaded, initializing...');
     await loadBudgetData();
     // Force light theme
     document.documentElement.setAttribute('data-theme', 'light');
@@ -206,15 +198,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDrillDown();
     initMobileFilter();
     initResponsiveHandlers();
-    // Show brief minimal loading screen
+    // Show a brief brand flash, then reveal the app (data + charts are already ready)
     setTimeout(() => {
         hideLoadingScreen();
-    }, 800); // 0.8 seconds of brief loading
+    }, 350);
 });
 
 // Data loading and processing
 async function loadBudgetData() {
-    console.log('Loading budget data...');
     const years = ['2024', '2025', '2026'];
     const filePaths = {
         '2024': './data/json/gul_bok_2024_datagrunnlag.json',
@@ -224,14 +215,11 @@ async function loadBudgetData() {
 
     try {
         const fetchPromises = years.map(async (year) => {
-            console.log(`Fetching ${year} data from: ${filePaths[year]}`);
             const response = await fetch(filePaths[year]);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status} for ${year}`);
             }
             const data = await response.json();
-            console.log(`${year} response status: ${response.status} OK`);
-            console.log(`${year} data structure:`, data);
 
             // Handle different data structures
             let items;
@@ -243,18 +231,13 @@ async function loadBudgetData() {
                 items = data; // Data is directly in array
             } else if (data && data.data && Array.isArray(data.data)) {
                 items = data.data; // Data is in data property (lowercase d)
-                } else {
-                console.error(`${year} data is not in expected format:`, data);
-                console.error(`${year} data type:`, typeof data);
-                if (data && typeof data === 'object') {
-                    console.error(`${year} data keys:`, Object.keys(data));
-                }
+            } else {
+                console.error(`Invalid data format for ${year}`, data);
                 throw new Error(`Invalid data format for ${year}`);
             }
-            
-            console.log(`${year} Data array length: ${items.length}`);
-            budgetData[year] = items.map(item => ({ ...item, year: parseInt(year) }));
-            console.log(`Loaded ${budgetData[year].length} budget items for ${year}`);
+
+            const yearNum = parseInt(year);
+            budgetData[year] = items.map(item => ({ ...item, year: yearNum }));
         });
 
         await Promise.all(fetchPromises);
@@ -289,8 +272,8 @@ async function loadBudgetData() {
             }
         });
 
-        console.log('Total budget items:', budgetData.combined.length);
-        console.log('Budget data loaded successfully!');
+        // Build the department index + stats caches once, up front.
+        buildDerivedCaches();
     } catch (error) {
         console.error('Failed to load budget data:', error);
         showErrorMessage('Failed to load budget data. Please try again later.');
@@ -356,9 +339,7 @@ function initSiteTitle() {
 }
 
 function getChapterByName(departmentName, chapterName) {
-    const deptItems = budgetData.combined.filter(item => 
-        item.fdep_navn && item.fdep_navn.trim() === departmentName
-    );
+    const deptItems = getDepartmentItems(departmentName);
     const groupedPosts = {};
     deptItems.forEach(item => {
         const chapterKey = item.kap_navn;
@@ -543,10 +524,8 @@ function drillUpOneLevel() {
         const chapterName = navigationPath[2];
         
         // Find the chapter data and show its details
-        const deptItems = budgetData.combined.filter(item => 
-            item.fdep_navn && item.fdep_navn.trim() === departmentName
-        );
-        
+        const deptItems = getDepartmentItems(departmentName);
+
         const groupedPosts = {};
         deptItems.forEach(item => {
             const chapterKey = item.kap_navn;
@@ -671,36 +650,36 @@ function updateQuickStats() {
 // Theme toggle functionality
 // Theme toggle removed; always light theme
 
-// Get unique departments
+// Get unique departments (cached, sorted)
 function getUniqueDepartments() {
-    const departments = new Set(budgetData.combined.map(item => 
+    if (uniqueDepartmentsCache) return uniqueDepartmentsCache;
+    return Array.from(new Set(budgetData.combined.map(item =>
         item.fdep_navn ? item.fdep_navn.trim() : 'Unknown'
-    ));
-    return Array.from(departments).sort();
+    ))).sort();
 }
 
-// Get department statistics
+// Items for a single department, via the prebuilt index (falls back to a scan).
+function getDepartmentItems(deptName) {
+    if (departmentIndex.has(deptName)) return departmentIndex.get(deptName);
+    return budgetData.combined.filter(item =>
+        item.fdep_navn && item.fdep_navn.trim() === deptName
+    );
+}
+
+// Get department statistics (memoised; sorted by 2026 total descending)
 function getDepartmentStats() {
+    if (departmentStatsCache) return departmentStatsCache;
+
     const departments = getUniqueDepartments();
     const departmentStats = [];
 
     departments.forEach(deptName => {
-        const deptItems = budgetData.combined.filter(item => 
-            item.fdep_navn && item.fdep_navn.trim() === deptName
-        );
-        
-        const totals = {};
-        ['2024', '2025', '2026'].forEach(year => {
-            const yearItems = deptItems.filter(item => item.year === parseInt(year));
-            totals[year] = yearItems.reduce((sum, item) => sum + (item.beløp || 0), 0);
-            
-            // Debug logging for first few departments
-            if (deptName === departments[0] && yearItems.length > 0) {
-                console.log(`${deptName} ${year}: ${yearItems.length} items, total: ${totals[year]}`);
-                console.log('Sample item:', yearItems[0]);
-                console.log('Sample beløp:', yearItems[0].beløp);
-                console.log('First 3 items beløp:', yearItems.slice(0, 3).map(item => item.beløp));
-            }
+        const deptItems = getDepartmentItems(deptName);
+
+        // Single pass over the department's items to total all three years.
+        const totals = { '2024': 0, '2025': 0, '2026': 0 };
+        deptItems.forEach(item => {
+            totals[item.year] += (item.beløp || 0);
         });
 
         const total2024 = totals['2024'] || 0;
@@ -729,8 +708,9 @@ function getDepartmentStats() {
             items: deptItems
         });
     });
-    
-    return departmentStats.sort((a, b) => b.total2026 - a.total2026); // Sort by 2026 total descending
+
+    departmentStatsCache = departmentStats.sort((a, b) => b.total2026 - a.total2026); // Sort by 2026 total descending
+    return departmentStatsCache;
 }
 
 // Aggregate stats for entire budget
@@ -775,9 +755,7 @@ function createDepartmentChartBlock(dept) {
     block.setAttribute('data-department', dept.name);
 
     // Get department metadata
-    const deptItems = budgetData.combined.filter(item => 
-        item.fdep_navn && item.fdep_navn.trim() === dept.name
-    );
+    const deptItems = getDepartmentItems(dept.name);
     const uniqueChapters = new Set(deptItems.map(item => item.kap_navn)).size;
     const chapterCount = uniqueChapters;
     
@@ -1083,10 +1061,8 @@ function showDrillDown(departmentName) {
     window.scrollTo({ top: 0, behavior: 'auto' });
     
     // Get department data
-    const deptItems = budgetData.combined.filter(item => 
-        item.fdep_navn && item.fdep_navn.trim() === departmentName
-    );
-    
+    const deptItems = getDepartmentItems(departmentName);
+
     // Group by budget chapter (kap_navn) instead of individual posts
     const groupedPosts = {};
     deptItems.forEach(item => {
@@ -1171,18 +1147,7 @@ function showBudgetChapterDetails(chapter) {
     
     // Re-init icons for newly inserted content
     initLucideIcons();
-
-    // Add back button functionality
-    const backButton = document.getElementById('back-button');
-    backButton.onclick = () => {
-        // Go back to department view
-        const departmentName = navigationPath[1];
-        if (departmentName) {
-            showDrillDown(departmentName);
-        } else {
-            showOverview();
-        }
-    };
+    // Back navigation is handled by the header drill-up button (see drillUpOneLevel).
 }
 
 function createIndividualBudgetPostElement(post) {
@@ -1327,19 +1292,11 @@ function showBudgetPostDetails(post) {
     const copyBtn = card.querySelector('.post-copy');
     const downloadBtn = card.querySelector('.post-download');
     const deptLike = { name: `${post.kap_nr}.${post.post_nr} ${post.post_navn}`, total2024, total2025, total2026 };
-    console.log('Post detail buttons found:', { copyBtn: !!copyBtn, downloadBtn: !!downloadBtn });
-    console.log('Button elements:', { copyBtn, downloadBtn });
     if (copyBtn) {
-        console.log('Copy button found, adding event listener');
         copyBtn.addEventListener('click', () => withIconFeedback(copyBtn, 'clipboard', copyChartData(deptLike)));
-    } else {
-        console.log('Copy button NOT found!');
     }
     if (downloadBtn) {
-        console.log('Download button found, adding event listener');
         downloadBtn.addEventListener('click', () => withIconFeedback(downloadBtn, 'download', downloadChartCSV(deptLike)));
-    } else {
-        console.log('Download button NOT found!');
     }
 
     // Render full-size chart
@@ -1348,20 +1305,7 @@ function showBudgetPostDetails(post) {
     
     // Initialize Lucide icons for the new content
     initLucideIcons();
-    
-    // Add back button functionality
-    const backButton = document.getElementById('back-button');
-    backButton.onclick = () => {
-        // Go back to chapter view
-        const chapterName = navigationPath[2];
-        if (chapterName) {
-            // Find the chapter and go back to it
-            const departmentName = navigationPath[1];
-            showDrillDown(departmentName);
-        } else {
-            showOverview();
-        }
-    };
+    // Back navigation is handled by the header drill-up button (see drillUpOneLevel).
 }
 
 function createBudgetPostElement(chapter) {
@@ -1437,182 +1381,3 @@ function createBudgetPostElement(chapter) {
     
     return postElement;
 }
-
-function createMiniChart(container, amount2024, amount2025, amount2026, label) {
-    // Responsive sizing based on screen width
-    const isMobile = window.innerWidth <= 768;
-    const isSmallMobile = window.innerWidth <= 480;
-    
-    let width, height;
-    if (isSmallMobile) {
-        width = 280;
-        height = 120;
-    } else if (isMobile) {
-        width = 320;
-        height = 150;
-    } else {
-        width = 350;
-        height = 180;
-    }
-    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    const years = ['2024', '2025', '2026'];
-    const amounts = [amount2024, amount2025, amount2026].map(amount => 
-        isNaN(amount) || amount === null || amount === undefined ? 0 : amount
-    );
-
-    const validAmounts = amounts.filter(amount => !isNaN(amount) && isFinite(amount));
-    if (validAmounts.length === 0) return;
-
-    const minAmount = Math.min(...validAmounts);
-    const maxAmount = Math.max(...validAmounts);
-    const baseRange = maxAmount - minAmount;
-    const hasNegative = minAmount < 0;
-    let paddedMin;
-    let paddedMax;
-    if (baseRange === 0) {
-        paddedMin = Math.min(Math.max(0, maxAmount * 0.9), maxAmount);
-        paddedMax = maxAmount * 1.1;
-    } else {
-        if (hasNegative) {
-            paddedMin = Math.max(-100000000, minAmount - baseRange * 0.1);
-        } else {
-            paddedMin = Math.max(0, minAmount - baseRange * 0.2);
-        }
-        paddedMax = maxAmount + baseRange * 0.1;
-        if (paddedMax <= paddedMin) paddedMax = paddedMin + Math.max(1, baseRange * 0.2);
-    }
-
-    const xScale = (index) => margin.left + (innerWidth / (years.length - 1)) * index;
-    const yScale = (amount) => {
-        const safeAmount = isNaN(amount) || amount === null || amount === undefined ? 0 : amount;
-        const domainMin = paddedMin;
-        const domainMax = paddedMax;
-        const range = Math.max(1e-9, domainMax - domainMin);
-        const clamped = Math.max(domainMin, Math.min(domainMax, safeAmount));
-        return margin.top + innerHeight - ((clamped - domainMin) / range) * innerHeight;
-    };
-
-    // Create SVG
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-    svg.classList.add('chart-svg');
-
-    // Define gradient
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    const linearGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-    linearGradient.setAttribute('id', `miniChartGradient-${Math.random().toString(36).substr(2, 9)}`);
-    linearGradient.setAttribute('x1', '0%');
-    linearGradient.setAttribute('y1', '0%');
-    linearGradient.setAttribute('x2', '0%');
-    linearGradient.setAttribute('y2', '100%');
-
-    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    stop1.setAttribute('offset', '0.4');
-    stop1.setAttribute('stop-color', '#0083ff');
-    stop1.setAttribute('stop-opacity', '1');
-    linearGradient.appendChild(stop1);
-
-    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    stop2.setAttribute('offset', '0.8');
-    stop2.setAttribute('stop-color', '#0083ff');
-    stop2.setAttribute('stop-opacity', '0');
-    linearGradient.appendChild(stop2);
-
-    defs.appendChild(linearGradient);
-    svg.appendChild(defs);
-
-    // Y-axis grid lines and labels
-    const numTicks = 3;
-    for (let i = 0; i <= numTicks; i++) {
-        const y = margin.top + (innerHeight / numTicks) * i;
-        const value = paddedMax - ((paddedMax - paddedMin) / numTicks) * i;
-
-        const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        gridLine.setAttribute('x1', margin.left);
-        gridLine.setAttribute('y1', y);
-        gridLine.setAttribute('x2', width - margin.right);
-        gridLine.setAttribute('y2', y);
-        gridLine.classList.add('chart-grid-line');
-        gridLine.style.stroke = 'var(--border-primary)';
-        gridLine.style.strokeDasharray = '2 2';
-        svg.appendChild(gridLine);
-
-        const textLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        textLabel.setAttribute('x', margin.left - 5);
-        textLabel.setAttribute('y', y + 4);
-        textLabel.classList.add('chart-label-y');
-        textLabel.style.fontSize = '10px';
-        textLabel.style.fill = 'var(--text-secondary)';
-        textLabel.textContent = formatAmount(value);
-        svg.appendChild(textLabel);
-    }
-
-    // X and Y axis lines
-    const xAxisLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    xAxisLine.setAttribute('x1', margin.left);
-    xAxisLine.setAttribute('y1', margin.top + innerHeight);
-    xAxisLine.setAttribute('x2', width - margin.right);
-    xAxisLine.setAttribute('y2', margin.top + innerHeight);
-    xAxisLine.classList.add('chart-axis-line');
-    xAxisLine.style.stroke = 'var(--text-primary)';
-    svg.appendChild(xAxisLine);
-
-    const yAxisLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    yAxisLine.setAttribute('x1', margin.left);
-    yAxisLine.setAttribute('y1', margin.top);
-    yAxisLine.setAttribute('x2', margin.left);
-    yAxisLine.setAttribute('y2', margin.top + innerHeight);
-    yAxisLine.classList.add('chart-axis-line');
-    yAxisLine.style.stroke = 'var(--text-primary)';
-    svg.appendChild(yAxisLine);
-
-    // Area path
-    const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const areaPoints = amounts.map((amount, i) => `${xScale(i)} ${yScale(amount)}`).join(' L ');
-    areaPath.setAttribute('d', `M ${xScale(0)} ${margin.top + innerHeight} L ${areaPoints} L ${xScale(years.length - 1)} ${margin.top + innerHeight} Z`);
-    areaPath.style.fill = `url(#${linearGradient.getAttribute('id')})`;
-    svg.appendChild(areaPath);
-
-    // Line path
-    const linePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    let lineD = `M ${xScale(0)} ${yScale(amounts[0])}`;
-    for (let i = 1; i < years.length; i++) {
-        lineD += ` L ${xScale(i)} ${yScale(amounts[i])}`;
-    }
-    linePath.setAttribute('d', lineD);
-    linePath.classList.add('chart-line');
-    linePath.style.stroke = '#0083ff';
-    linePath.style.strokeWidth = '2';
-    svg.appendChild(linePath);
-
-    // Create data points
-    years.forEach((year, index) => {
-        const point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        point.setAttribute('cx', xScale(index));
-        point.setAttribute('cy', yScale(amounts[index]));
-        point.classList.add('chart-point');
-        point.style.fill = '#0083ff';
-        point.style.stroke = 'var(--bg-primary)';
-        point.style.strokeWidth = '2';
-        point.setAttribute('r', '3');
-        svg.appendChild(point);
-
-        // Year labels (just the year, no values)
-        const yearLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        yearLabel.setAttribute('x', xScale(index));
-        yearLabel.setAttribute('y', height - 10);
-        yearLabel.classList.add('chart-label');
-        yearLabel.style.fontSize = '11px';
-        yearLabel.style.fill = 'var(--text-primary)';
-        yearLabel.textContent = year;
-        svg.appendChild(yearLabel);
-    });
-
-    container.appendChild(svg);
-}
-
-console.log('Statsbudsjettet main.js loaded');
